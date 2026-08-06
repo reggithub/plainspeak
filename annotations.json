@@ -13,16 +13,5 @@
       "note": "Trial 4",
       "expires": "2026-08-09T00:00:00Z"
     }
-    {
-      "id": "2026-08-06-smoketest2",
-      "headline": "Moderate",
-      "ops": [
-        { "t": "insert", "at": 0, "text": "So-called " 
-        }
-      ],
-      "source": "https://example.com",
-      "note": "Trial 3",
-      "expires": "2026-08-09T00:00:00Z"
-    }
   ]
 }
