@@ -1,18 +1,19 @@
 {
   "publication": "The New York Times",
-  "annotations": [
+  "annotations": 
+  [
     {
       "id": "2026-08-06-smoketest",
       "headline": "Senate Committee Votes to Hold Fauci in Contempt of Congress",
       "ops": [
-        { "t": "insert", "at": 0, "text": "Republican " }
-
+        { "t": "insert", "at": 0, "text": "Republican " 
+        }
       ],
       "source": "https://example.com",
       "note": "Smoke test only.",
       "expires": "2026-08-09T00:00:00Z"
     }
-     {
+    {
       "id": "2026-08-06-smoketest",
       "headline": "Moderate Democrats Prepare",
       "ops": [
