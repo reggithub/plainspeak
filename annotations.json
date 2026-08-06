@@ -4,13 +4,13 @@
   "annotations": [
     {
       "id": "2026-08-06-a",
-      "headline": "Trump's Meddling in Justice Dept. Causes Problems of His Own Making",
+      "headline": "Senate Committee Votes to Hold Fauci in Contempt of Congress",
       "ops": [
         { "t": "strike", "start": 8, "len": 11 },
-        { "t": "insert", "at": 19, "text": "Abuse of the" }
+        { "t": "insert", "at": 1, "text": "Republicans on " }
       ],
       "source": "https://example.gov/document-url",
-      "note": "'Meddling' frames a documented directive to drop a pending case as informal interference.",
+      "note": "The scene presided by the Republicans wasn't much different than the 'Show Trials' under Stalin.",
       "expires": "2026-08-08T00:00:00Z"
     }
   ]
