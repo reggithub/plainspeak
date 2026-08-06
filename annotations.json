@@ -1,17 +1,16 @@
 {
   "publication": "The New York Times",
-  "updated": "2026-08-06T09:00:00Z",
   "annotations": [
     {
-      "id": "2026-08-06-a",
-      "headline": "Senate Committee Votes to Hold Fauci in Contempt of Congress",
+      "id": "2026-08-06-smoketest",
+      "headline": "How Fauci Got to This Point and the Legal Peril He Faces",
       "ops": [
-        { "t": "strike", "start": 8, "len": 11 },
-        { "t": "insert", "at": 1, "text": "Republicans on " }
+        { "t": "strike", "start": 0, "len": 3 },
+        { "t": "insert", "at": 3, "text": "TEST" }
       ],
-      "source": "https://example.gov/document-url",
-      "note": "The scene presided by the Republicans wasn't much different than the 'Show Trials' under Stalin.",
-      "expires": "2026-08-08T00:00:00Z"
+      "source": "https://example.com",
+      "note": "Smoke test only.",
+      "expires": "2026-08-09T00:00:00Z"
     }
   ]
 }
