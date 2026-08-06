@@ -5,7 +5,9 @@
       "id": "2026-08-06-smoketest",
       "headline": "Senate Committee Votes to Hold Fauci in Contempt of Congress",
       "ops": [
+        { "t": "strike", "start": 13, "len": 1 },
         { "t": "insert", "at": 0, "text": "Republicans on " }
+
       ],
       "source": "https://example.com",
       "note": "Smoke test only.",
