@@ -13,16 +13,5 @@
       "note": "Smoke test only.",
       "expires": "2026-08-09T00:00:00Z"
     }
-    {
-      "id": "2026-08-06-smoketest",
-      "headline": "Moderate Democrats Prepare",
-      "ops": [
-        { "t": "insert", "at": 0, "text": "'" }
-        { "t": "insert", "at": 8, "text": "'" }
-      ],
-      "source": "https://example.com",
-      "note": "Smoke test only.",
-      "expires": "2026-08-09T00:00:00Z"
-    }
   ]
 }
