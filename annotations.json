@@ -3,7 +3,7 @@
   "annotations": [
     {
       "id": "2026-08-06-smoketest",
-      "headline": "How Fauci Got to This Point and the Legal Peril He Faces",
+      "headline": "Senate Committee Votes to Hold Fauci in Contempt of Congress",
       "ops": [
         { "t": "strike", "start": 0, "len": 3 },
         { "t": "insert", "at": 3, "text": "TEST" }
