@@ -11,16 +11,6 @@
       "source": "https://example.com",
       "note": "One sentence on why this framing is a euphemism.",
       "expires": "2026-08-09T00:00:00Z"
-    },
-    {
-      "id": "2026-08-06-b",
-      "headline": "How Fauci Got to This Point and the Legal Peril He Faces",
-      "ops": [
-        { "t": "insert", "at": 0, "text": "ANOTHER" }
-      ],
-      "source": "https://example.com",
-      "note": "Second annotation.",
-      "expires": "2026-08-09T00:00:00Z"
     }
   ]
 }
