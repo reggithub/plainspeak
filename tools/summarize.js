@@ -38,19 +38,38 @@ if (!added.length && !removed.length && !updated.length) {
   process.exit(0);
 }
 
-// Subject: lead with whichever kind of change dominates, and name the headline
-// when there is exactly one -- that is the common case and the useful one.
+// Subject: name the headline when exactly one annotation moved -- the common
+// case -- and say which direction it moved. Calling a removal "Annotate" read
+// as the opposite of what the commit did.
 const parts = [];
 if (added.length) parts.push("add " + added.length);
 if (updated.length) parts.push("update " + updated.length);
 if (removed.length) parts.push("remove " + removed.length);
 
+// Keep the whole subject inside the 72 columns git log formats to, trimming the
+// headline rather than the verb, and on a word boundary where one is close.
+function subject(verb, headline) {
+  const room = Math.max(24, 72 - verb.length - 3);
+  let h = headline;
+  if (h.length > room) {
+    h = h.slice(0, room - 3);
+    const space = h.lastIndexOf(" ");
+    if (space > room * 0.6) h = h.slice(0, space);
+    h += "...";
+  }
+  return verb + " " + JSON.stringify(h);
+}
+
 const only = added.length + updated.length + removed.length === 1;
 const oneId = [...added, ...updated, ...removed][0];
 const oneHeadline = (after.get(oneId) || before.get(oneId) || {}).headline || "";
 
+const verb = added.length ? "Annotate"
+           : updated.length ? "Revise annotation for"
+           : "Remove annotation for";
+
 console.log(only && oneHeadline
-  ? "Annotate " + JSON.stringify(oneHeadline.slice(0, 60))
+  ? subject(verb, oneHeadline)
   : "Annotations: " + parts.join(", "));
 
 console.log("");
