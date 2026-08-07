@@ -4,10 +4,10 @@
   [
     {
       "id": "2026-08-06-smoketest",
-      "headline": "McConnell Announces Discharge From Rehabilitation Center",
+      "headline": "Mitch McConnell Announces Discharge From Rehabilitation Center",
       "ops": [
 
-        { "t": "insert", "at": 0, "text": "Office of Mitch " 
+        { "t": "insert", "at": 0, "text": "Office of " 
         }
       ],
       "source": "https://example.com",
