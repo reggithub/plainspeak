@@ -45,5 +45,17 @@
       "note": "One sentence on why this framing is a euphemism.",
       "expires": "2026-08-09T00:00:00Z"
     }
+    ,
+    {
+      "id": "2026-08-07-d",
+      "headline": "Activists Tell of Abuse in Israeli Custody",
+      "ops": [
+        { "t": "strike", "start": 10, "len": 7 },
+        { "t": "insert", "at": 18, "text": "Claim " }
+      ],
+      "source": "https://example.com",
+      "note": "One sentence on why this framing is a euphemism.",
+      "expires": "2026-08-09T00:00:00Z"
+    }
   ]
 }
