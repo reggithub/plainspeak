@@ -4,6 +4,8 @@
   "version": "0.2.0",
   "description": "Reader's assistant. Renders Plainspeak's editorial annotations on headlines, marked as ours.",
 
+  "permissions": ["storage"],
+
   "host_permissions": [
     "https://www.nytimes.com/*",
     "https://raw.githubusercontent.com/*"

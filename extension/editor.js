@@ -179,6 +179,7 @@
 
   function refreshAll() {
     for (const r of rows) refreshRow(r);
+    captureDrafts();
     applyFilter();
 
     const anns = collect();
@@ -250,9 +251,19 @@
 
     const r = {
       cand, node, editBox, preview, meta, sourceBox, noteBox, status, baseline,
+      defaults: { source: sourceBox.value, note: noteBox.value },
       annId: ann ? ann.id : null,
       expires: ann ? ann.expires : null
     };
+
+    // Restore an unsaved rewrite of this same headline from a previous session.
+    const draft = drafts[cand.key];
+    if (draft && draft.edited && draft.edited !== baseline) {
+      editBox.textContent = draft.edited;
+      if (draft.source) sourceBox.value = draft.source;
+      if (draft.note) noteBox.value = draft.note;
+      r.restored = true;
+    }
 
     editBox.addEventListener("input", refreshAll);
     sourceBox.addEventListener("input", refreshAll);
@@ -374,6 +385,13 @@
       t.btn.classList.toggle("ps-ed-on", view === t.view);
     }
 
+    const nDrafts = Object.keys(drafts).length;
+    const disc = document.getElementById("ps-ed-discard");
+    if (disc) {
+      disc.hidden = !nDrafts;
+      disc.textContent = "discard " + nDrafts + (nDrafts === 1 ? " draft" : " drafts");
+    }
+
     const sub = document.getElementById("ps-ed-sub");
     if (sub) {
       sub.textContent = query.trim()
@@ -399,6 +417,55 @@
   // The handle lives in this origin's IndexedDB, so clearing site data for the
   // publisher means picking the file again. Permission is re-checked on every
   // save; the browser may re-prompt once per session.
+
+  // ---------------------------------------------------------------- drafts
+  //
+  // Unsaved rewrites survive closing the panel, reloading the page and
+  // restarting the browser. Editing a headline is slow, deliberate work; losing
+  // it to a stray Escape is not acceptable.
+  //
+  // chrome.storage.local rather than the page's IndexedDB: extension-scoped, so
+  // clearing the publisher's site data does not take the drafts with it. The
+  // file handle cannot live here -- it is not JSON -- hence the separate store
+  // below. Keyed by normalized headline, which is what identifies a target.
+
+  const DRAFT_KEY = "drafts";
+  let drafts = {};
+  let draftTimer = null;
+
+  function persistDrafts() {
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(() => {
+      try { chrome.storage.local.set({ [DRAFT_KEY]: drafts }); } catch (e) { /* storage gone */ }
+    }, 300);
+  }
+
+  function captureDrafts() {
+    for (const r of rows) {
+      const edited = M.normalize(r.editBox.textContent);
+      if (edited && edited !== r.baseline) {
+        drafts[r.cand.key] = {
+          edited,
+          source: r.sourceBox.value,
+          note: r.noteBox.value
+        };
+      } else {
+        delete drafts[r.cand.key];
+      }
+    }
+    persistDrafts();
+  }
+
+  function discardDrafts() {
+    drafts = {};
+    persistDrafts();
+    for (const r of rows) {
+      r.editBox.textContent = r.baseline;
+      r.sourceBox.value = r.defaults.source;
+      r.noteBox.value = r.defaults.note;
+    }
+    refreshAll();
+  }
 
   const DB_NAME = "plainspeak", DB_STORE = "handles", DB_KEY = "annotations";
   let fileHandle = null;
@@ -490,9 +557,13 @@
       await w.write(text);
       await w.close();
 
-      // The file now holds what we merged, so a second save starts from it.
+      // The file now holds what we merged, so a second save starts from it and
+      // the rows are no longer pending: their current text IS the saved state.
       base = JSON.parse(text);
       baseSource = "file";
+      for (const r of rows) r.baseline = M.normalize(r.editBox.textContent);
+      drafts = {};
+      persistDrafts();
       refreshAll();
       return "saved to " + fileHandle.name;
     } catch (e) {
@@ -664,6 +735,12 @@
     const foot = el("div", "ps-ed-foot");
     const count = el("span", "ps-ed-sub", "none edited yet");
     count.id = "ps-ed-count";
+    const discard = el("button", "ps-ed-btn", "discard drafts");
+    discard.id = "ps-ed-discard";
+    discard.hidden = true;
+    discard.title = "Throw away every unsaved rewrite, including ones restored from an earlier session";
+    discard.addEventListener("click", discardDrafts);
+
     const mode = el("button", "ps-ed-btn", "whole file");
     const save = el("button", "ps-ed-btn", "save to project");
     const copy = el("button", "ps-ed-btn ps-ed-primary", "copy JSON");
@@ -710,7 +787,7 @@
       setTimeout(() => { copy.textContent = "copy JSON"; }, 1600);
     });
 
-    foot.append(count, mode, save, copy);
+    foot.append(count, discard, mode, save, copy);
     panel.append(foot, json);
 
     document.body.appendChild(panel);
@@ -726,6 +803,13 @@
     feedRows.length = 0;
     query = "";
   }
+
+  // Load drafts at script start so they are in hand before the panel is opened.
+  try {
+    chrome.storage.local.get(DRAFT_KEY, (o) => {
+      if (o && o[DRAFT_KEY]) drafts = o[DRAFT_KEY];
+    });
+  } catch (e) { /* storage unavailable; drafts simply will not persist */ }
 
   document.addEventListener("keydown", (e) => {
     if (e.altKey && (e.key === "e" || e.key === "E")) {
