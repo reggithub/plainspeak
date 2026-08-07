@@ -6,7 +6,7 @@
       "headline": "Trump Again Targets Birthright Citizenship, in Two Executive Orders",
       "ops": [
         { "t": "strike", "start": 12, "len": 7 },
-        { "t": "insert", "at": 20, "text": "Constitutionally-protected" }
+        { "t": "insert", "at": 20, "text": "Constitutionally-protected " }
       ],
       "source": "https://example.com",
       "note": "One sentence on why this framing is a euphemism.",
