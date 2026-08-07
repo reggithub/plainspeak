@@ -12,12 +12,23 @@
       "note": "One sentence on why this framing is a euphemism.",
       "expires": "2026-08-09T00:00:00Z"
     },
-        {
+    {
       "id": "2026-08-07-b",
       "headline": "Blanche's Nomination for Attorney General",
       "ops": [
   
         { "t": "insert", "at": 0, "text": "Trump's Sometimes Personal Lawyer Todd " }
+      ],
+      "source": "https://example.com",
+      "note": "One sentence on why this framing is a euphemism.",
+      "expires": "2026-08-09T00:00:00Z"
+    },
+    {
+      "id": "2026-08-07-c",
+      "headline": "Republicans Cannot Possibly Let This Congressman Go",
+      "ops": [
+  
+        { "t": "insert", "at": 48, "text": "? Look at How They Handled Trump" }
       ],
       "source": "https://example.com",
       "note": "One sentence on why this framing is a euphemism.",
