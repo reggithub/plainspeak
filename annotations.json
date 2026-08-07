@@ -7,7 +7,7 @@
       "headline": "Mitch McConnell Announces Discharge From Rehabilitation Center",
       "ops": [
 
-        { "t": "insert", "at": 0, "text": "Office of " 
+        { "t": "insert", "at": 0, "text": "Statement Issued by Office of " 
         }
       ],
       "source": "https://example.com",
