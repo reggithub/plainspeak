@@ -5,7 +5,7 @@
       "id": "2026-08-07-a",
       "headline": "Trump Again Targets Birthright Citizenship, in Two Executive Orders",
       "ops": [
-        { "t": "strike", "start": 12, "len": 7 },
+        { "t": "strike", "start": 12, "len": 8 },
         { "t": "insert", "at": 20, "text": "Tries to Kill Constitutionally-protected " }
       ],
       "source": "https://example.com",
@@ -28,7 +28,7 @@
       "headline": "Republicans Cannot Possibly Let This Congressman Go",
       "ops": [
   
-        { "t": "insert", "at": 48, "text": "? Look at How They Handled Trump" }
+        { "t": "insert", "at": 51, "text": "? Look at How They Handled Trump" }
       ],
       "source": "https://example.com",
       "note": "One sentence on why this framing is a euphemism.",
