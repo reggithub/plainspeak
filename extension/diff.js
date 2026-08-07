@@ -74,11 +74,17 @@
 
       // Pull the trim back to a word boundary. "Targets" -> "Tries" shares a
       // leading "T", and trimming it would strike "argets" and leave a widowed
-      // "T". Exception: if the trim swallows the whole span there is no strike
-      // left to widow, which is what turns "Go" -> "Go? Look..." into a bare
-      // insert instead of striking "Go" and retyping it.
-      if (p < del.length) { while (p > 0 && del[p - 1] !== " ") p--; }
-      if (s < del.length - p) { while (s > 0 && del[del.length - s] !== " ") s--; }
+      // "T".
+      //
+      // Exception: when prefix and suffix together consume the whole span there
+      // is no fragment left to widow, so the trim stands. That is what keeps
+      // "Go" -> "Go? Look at..." a bare append, and "Cassidy" -> "Cassidy,
+      // Future Lobbyist," a bare insert rather than striking the man's name and
+      // retyping it.
+      if (p + s < del.length) {
+        while (p > 0 && del[p - 1] !== " ") p--;
+        if (s < del.length - p) { while (s > 0 && del[del.length - s] !== " ") s--; }
+      }
 
       ds += p;
       de -= s;

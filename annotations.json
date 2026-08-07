@@ -61,8 +61,7 @@
       "id": "2026-08-07-e",
       "headline": "Cassidy Will Back Blanche, Salvaging His Confirmation",
       "ops": [
-        { "t": "strike", "start": 10, "len": 7 },
-        { "t": "insert", "at": 8, "text": ",Future Lobbyist,  " }
+        { "t": "insert", "at": 7, "text": ", Future Lobbyist," }
       ],
       "source": "https://example.com",
       "note": "One sentence on why this framing is a euphemism.",

@@ -38,6 +38,12 @@ eq("2026-08-07-c  append at the end", buildOps(C_O, C_E), [
   { t: "insert", at: 51, text: "? Look at How They Handled Trump" }
 ]);
 
+const E_O = "Cassidy Will Back Blanche, Salvaging His Confirmation";
+const E_E = "Cassidy, Future Lobbyist, Will Back Blanche, Salvaging His Confirmation";
+eq("2026-08-07-e  appositive after a name, no strike", buildOps(E_O, E_E), [
+  { t: "insert", at: 7, text: ", Future Lobbyist," }
+]);
+
 console.log("\nedge cases");
 
 eq("no change", buildOps("Same Headline Here", "Same Headline Here"), []);
