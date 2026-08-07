@@ -43,6 +43,44 @@
   // annotate the editor's own rows, and the editor would offer them as candidates.
   const OURS = "#ps-editor, #ps-badge";
 
+  // NYT article URLs carry a date path: /2026/08/07/us/politics/....
+  const ARTICLE_HREF = /\/\d{4}\/\d{2}\/\d{2}\//;
+
+  // Which article a run of text belongs to, if any. The link may wrap the text
+  // itself, or wrap the whole card the text sits inside, so walk up a little.
+  function articleHref(el) {
+    let n = el;
+    for (let hops = 0; n && hops < 4; hops++, n = n.parentElement) {
+      if (n.tagName === "A" && ARTICLE_HREF.test(n.getAttribute("href") || "")) return n.href;
+      if (hops > 0) {
+        const a = n.querySelector("a[href]");
+        if (a && ARTICLE_HREF.test(a.getAttribute("href") || "")) return a.href;
+      }
+    }
+    return null;
+  }
+
+  // Separates story headlines from the summaries, blurbs and nav text that share
+  // the same shape. Two signals: a real heading tag is always a headline, and
+  // within one article card the FIRST piece of text is the headline (the rest is
+  // the summary). Deliberately generous -- the editor still offers everything
+  // under its "all" view, so a misfire here hides a headline rather than losing it.
+  function classify(list) {
+    const claimed = new Set();
+    for (const c of list) {
+      if (/^h[1-4]$/.test(c.tag)) {
+        c.kind = "headline";
+        if (c.href) claimed.add(c.href);
+      } else if (c.href && !claimed.has(c.href)) {
+        c.kind = "headline";
+        claimed.add(c.href);
+      } else {
+        c.kind = "text";
+      }
+    }
+    return list;
+  }
+
   // Every element whose whole text could be a headline, deduped by normalized
   // key. Keeps the DEEPEST element per key: an ancestor may also "contain" the
   // headline, and rewriting that would destroy neighbouring content.
@@ -64,10 +102,14 @@
       const k = text.toLowerCase();
       const prev = byKey.get(k);
       if (!prev || prev.el.contains(el)) {
-        byKey.set(k, { el, text, key: k, tag: el.tagName.toLowerCase() });
+        byKey.set(k, {
+          el, text, key: k,
+          tag: el.tagName.toLowerCase(),
+          href: articleHref(el)
+        });
       }
     }
-    return [...byKey.values()];
+    return classify([...byKey.values()]);
   }
 
   // The single deepest element matching one headline key, or null.
@@ -87,5 +129,7 @@
     return best;
   }
 
-  root.PS_MATCH = { PUNCT, normalize, key, candidates, findTarget, SELECTOR };
+  const api = { PUNCT, normalize, key, candidates, findTarget, classify, SELECTOR };
+  if (typeof module === "object" && module.exports) module.exports = api;
+  else root.PS_MATCH = api;
 })(typeof globalThis !== "undefined" ? globalThis : this);

@@ -17,7 +17,8 @@
   const ID = "ps-editor";
 
   let rows = [];   // {cand, edited, source, note, el refs}
-  let onlyEdited = false;
+  let view = "headline";   // headline | all | edited
+  const tabs = [];
 
   // ------------------------------------------------------------------- helpers
 
@@ -107,6 +108,8 @@
 
   function refreshAll() {
     for (const r of rows) refreshRow(r);
+    applyFilter();
+
     const anns = collect();
     const out = document.getElementById("ps-ed-json");
     out.value = anns.length ? JSON.stringify(anns, null, 2) : "";
@@ -120,7 +123,12 @@
     const node = el("div", "ps-ed-row");
 
     const head = el("div", "ps-ed-head");
-    head.appendChild(el("span", "ps-ed-tag", cand.tag));
+    const tag = el("span", "ps-ed-tag", cand.tag);
+    if (cand.href) {
+      tag.classList.add("ps-ed-story");
+      tag.title = cand.href;
+    }
+    head.appendChild(tag);
     const orig = el("span", "ps-ed-orig", cand.text);
     orig.title = "click to scroll to this headline on the page";
     head.appendChild(orig);
@@ -139,6 +147,8 @@
     const sourceBox = el("input");
     sourceBox.placeholder = "source URL";
     sourceBox.type = "url";
+    // The card's own link is almost always the right source, so prefill it.
+    if (cand.href) sourceBox.value = cand.href;
     const noteBox = el("input");
     noteBox.placeholder = "note - why this framing misleads";
     const status = el("span", "ps-ed-status");
@@ -153,54 +163,104 @@
     noteBox.addEventListener("input", refreshAll);
     reset.addEventListener("click", () => { editBox.textContent = cand.text; refreshAll(); });
 
-    orig.addEventListener("click", () => {
-      cand.el.scrollIntoView({ block: "center", behavior: "smooth" });
-      cand.el.classList.add("ps-ed-flash");
-      setTimeout(() => cand.el.classList.remove("ps-ed-flash"), 1200);
-    });
+    orig.addEventListener("click", () => reveal(cand, true));
+
+    // Entering any field on a row brings its headline into view on the page, so
+    // the rewrite is always made against the story as it is actually presented.
+    for (const field of [editBox, sourceBox, noteBox]) {
+      field.addEventListener("focus", () => reveal(cand, false));
+    }
 
     return r;
   }
 
+  // Scroll the real page element into view. `force` is for an explicit click;
+  // on focus we leave it alone if it is already comfortably visible, so tabbing
+  // between fields does not yank the page around.
+  function reveal(cand, force) {
+    const el = cand.el;
+    if (!el.isConnected) return;
+
+    const box = el.getBoundingClientRect();
+    const visible = box.top >= 60 && box.bottom <= window.innerHeight - 40;
+    if (!force && visible) { flash(el); return; }
+
+    el.scrollIntoView({ block: "center", behavior: "smooth" });
+    flash(el);
+  }
+
+  function flash(el) {
+    el.classList.add("ps-ed-flash");
+    setTimeout(() => el.classList.remove("ps-ed-flash"), 1200);
+  }
+
   function applyFilter() {
+    let shown = 0;
     for (const r of rows) {
       const changed = r.node.classList.contains("ps-ed-changed");
-      r.node.hidden = onlyEdited && !changed;
+      // An edited row stays visible in every view: switching filters must never
+      // hide work already started.
+      const show = view === "all" ? true
+                 : view === "edited" ? changed
+                 : r.cand.kind === "headline" || changed;
+      r.node.hidden = !show;
+      if (show) shown++;
     }
+
+    const counts = {
+      headline: rows.filter((r) => r.cand.kind === "headline").length,
+      all: rows.length,
+      edited: rows.filter((r) => r.node.classList.contains("ps-ed-changed")).length
+    };
+    for (const t of tabs) {
+      t.btn.textContent = t.label + " " + counts[t.view];
+      t.btn.classList.toggle("ps-ed-on", view === t.view);
+    }
+
+    const empty = document.getElementById("ps-ed-empty");
+    if (empty) empty.hidden = shown > 0 || !rows.length;
   }
 
   // -------------------------------------------------------------------- panel
 
   function open() {
-    const cands = M.candidates({ minWords: 3, skipAttr: "data-plainspeak" });
+    // minWords 2, not 3: short headlines are real, and the headline filter now
+    // does the work of keeping nav chrome out of the default view.
+    const cands = M.candidates({ minWords: 2, skipAttr: "data-plainspeak" });
 
     const panel = el("div");
     panel.id = ID;
 
     const bar = el("div", "ps-ed-bar");
     bar.appendChild(el("strong", null, "Plainspeak editor"));
-    bar.appendChild(el("span", "ps-ed-sub",
-      cands.length + " headline" + (cands.length === 1 ? "" : "s") + " on this page"));
+    const heads = cands.filter((c) => c.kind === "headline").length;
+    bar.appendChild(el("span", "ps-ed-sub", heads + " of " + cands.length + " matchable"));
 
-    const filter = el("button", "ps-ed-btn", "show only edited");
-    filter.addEventListener("click", () => {
-      onlyEdited = !onlyEdited;
-      filter.textContent = onlyEdited ? "show all" : "show only edited";
-      applyFilter();
-    });
+    tabs.length = 0;
+    for (const [v, label] of [["headline", "headlines"], ["all", "all"], ["edited", "edited"]]) {
+      const btn = el("button", "ps-ed-btn", label);
+      btn.addEventListener("click", () => { view = v; applyFilter(); });
+      tabs.push({ view: v, label, btn });
+      bar.appendChild(btn);
+    }
+
     const close = el("button", "ps-ed-btn ps-ed-close", "close");
     close.addEventListener("click", shut);
-    bar.append(filter, close);
+    bar.appendChild(close);
     panel.appendChild(bar);
 
     const list = el("div", "ps-ed-list");
     rows = cands.map(buildRow);
     for (const r of rows) list.appendChild(r.node);
-    if (!cands.length) {
-      list.appendChild(el("div", "ps-ed-empty",
-        "No candidates. Either this is not a front page, or everything here is " +
-        "already annotated."));
-    }
+
+    const empty = el("div", "ps-ed-empty", !cands.length
+      ? "Nothing matchable here. Either this is not a page the extension runs on, " +
+        "or everything on it is already annotated."
+      : "No rows in this view. Try “all” — the headline filter looks for a " +
+        "story link, and some cards do not have one.");
+    empty.id = "ps-ed-empty";
+    empty.hidden = true;
+    list.appendChild(empty);
     panel.appendChild(list);
 
     const foot = el("div", "ps-ed-foot");

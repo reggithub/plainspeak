@@ -50,6 +50,8 @@
   cursor: pointer;
 }
 .ps-ed-btn:hover { background: #f2efe9; }
+.ps-ed-on { background: #2f2c28; border-color: #2f2c28; color: #fff; }
+.ps-ed-on:hover { background: #2f2c28; }
 .ps-ed-primary { background: #c0261f; border-color: #c0261f; color: #fff; }
 .ps-ed-primary:hover { background: #a81f19; }
 
@@ -67,6 +69,10 @@
   color: #9a9a9a;
   flex: 0 0 auto;
 }
+
+/* Text that resolves to a dated article URL, i.e. a real story card. */
+.ps-ed-tag.ps-ed-story { color: #c0261f; cursor: help; }
+.ps-ed-tag.ps-ed-story::after { content: " \2197"; }
 
 .ps-ed-orig {
   font-size: 11px;
