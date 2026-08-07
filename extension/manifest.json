@@ -21,7 +21,7 @@
         "https://www.nytimes.com/international/",
         "https://www.nytimes.com/ca/"
       ],
-      "js": ["match.js", "diff.js", "content.js", "editor.js"],
+      "js": ["match.js", "diff.js", "feed.js", "content.js", "editor.js"],
       "css": ["annotate.css", "editor.css"],
       "run_at": "document_idle"
     }

@@ -188,7 +188,7 @@
 
     if (whole) {
       const file = buildFile();
-      out.value = JSON.stringify(file, null, 2);
+      out.value = PS_FEED.formatFeed(file);
       // Naming the merge base matters: "feed" means anything committed but not
       // pushed is absent from this output, and saving would revert it. Kept
       // terse so it cannot crowd the buttons; the detail is in the tooltip.
@@ -200,7 +200,7 @@
         : "Merging into the published feed - anything committed but not pushed " +
           "is missing from this output, and saving would revert it.";
     } else {
-      out.value = anns.length ? JSON.stringify(anns, null, 2) : "";
+      out.value = anns.length ? PS_FEED.formatAnnotations(anns) : "";
       count.textContent = anns.length ? anns.length + " ready" : "none edited yet";
     }
   }
@@ -531,7 +531,7 @@
   // annotations.json holding a fragment of itself.
   async function saveToProject() {
     if (!window.showSaveFilePicker) {
-      fallbackDownload(JSON.stringify(buildFile(), null, 2) + "\n");
+      fallbackDownload(PS_FEED.formatFeed(buildFile()));
       return "downloaded";
     }
 
@@ -556,7 +556,7 @@
       // while, and the file can have changed underneath it -- an edit in the
       // IDE, a git pull, another save. Merging into a stale copy would undo it.
       await loadBase();
-      const text = JSON.stringify(buildFile(), null, 2) + "\n";
+      const text = PS_FEED.formatFeed(buildFile());
 
       const w = await fileHandle.createWritable();
       await w.write(text);
@@ -574,7 +574,7 @@
     } catch (e) {
       if (e && e.name === "AbortError") return "cancelled";
       console.warn("[plainspeak] save failed:", e && e.message);
-      fallbackDownload(JSON.stringify(buildFile(), null, 2) + "\n");
+      fallbackDownload(PS_FEED.formatFeed(buildFile()));
       return "picker failed - downloaded instead";
     }
   }
