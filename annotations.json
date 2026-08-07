@@ -1,17 +1,21 @@
 {
   "publication": "The New York Times",
   "annotations": [
+ 
+  {
+    "id": "2026-08-07-g",
+    "headline": "Meta Ordered to Pay $567 Million in New Mexico Child Safety Case2 min read",
+    "ops": [
       {
-      "id": "2026-08-07-z",
-      "headline": "Meta Ordered to Pay",
-      "ops": [
-  
-        { "t": "insert", "at": 19, "text": " Less than 1% of Its Profits" }
-      ],
-      "source": "https://example.com",
-      "note": "One sentence on why this framing is a euphemism.",
-      "expires": "2026-08-09T00:00:00Z"
-    },
+        "t": "insert",
+        "at": 33,
+        "text": "(Less than 1% of Its Profits) "
+      }
+    ],
+    "source": "https://example.com",
+    "note": "",
+    "expires": "2026-08-09T00:00:00Z"
+  },
     {
       "id": "2026-08-07-a",
       "headline": "Trump Again Targets Birthright Citizenship, in Two Executive Orders",
