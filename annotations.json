@@ -1,27 +1,34 @@
 {
   "publication": "The New York Times",
   "annotations": [
- 
-  {
-    "id": "2026-08-07-g",
-    "headline": "Meta Ordered to Pay $567 Million in New Mexico Child Safety Case",
-    "ops": [
-      {
-        "t": "insert",
-        "at": 33,
-        "text": "(Less than 1% of Its Profits) "
-      }
-    ],
-    "source": "https://example.com",
-    "note": "",
-    "expires": "2026-08-09T00:00:00Z"
-  },
+    {
+      "id": "2026-08-07-g",
+      "headline": "Meta Ordered to Pay $567 Million in New Mexico Child Safety Case",
+      "ops": [
+        {
+          "t": "insert",
+          "at": 33,
+          "text": "(Less than 1% of Its Profits) "
+        }
+      ],
+      "source": "https://example.com",
+      "note": "",
+      "expires": "2026-08-09T00:00:00Z"
+    },
     {
       "id": "2026-08-07-a",
       "headline": "Trump Again Targets Birthright Citizenship, in Two Executive Orders",
       "ops": [
-        { "t": "strike", "start": 12, "len": 8 },
-        { "t": "insert", "at": 20, "text": "Tries to Kill Constitutionally-protected " }
+        {
+          "t": "strike",
+          "start": 12,
+          "len": 8
+        },
+        {
+          "t": "insert",
+          "at": 20,
+          "text": "Tries to Kill Constitutionally-protected "
+        }
       ],
       "source": "https://example.com",
       "note": "One sentence on why this framing is a euphemism.",
@@ -31,8 +38,11 @@
       "id": "2026-08-07-b",
       "headline": "Blanche's Nomination for Attorney General",
       "ops": [
-  
-        { "t": "insert", "at": 0, "text": "Trump's Sometimes Personal Lawyer Todd " }
+        {
+          "t": "insert",
+          "at": 0,
+          "text": "Trump's Sometimes Personal Lawyer Todd "
+        }
       ],
       "source": "https://example.com",
       "note": "One sentence on why this framing is a euphemism.",
@@ -42,56 +52,84 @@
       "id": "2026-08-07-c",
       "headline": "Republicans Cannot Possibly Let This Congressman Go",
       "ops": [
-  
-        { "t": "insert", "at": 51, "text": "? Look at How They Handled Trump" }
+        {
+          "t": "insert",
+          "at": 51,
+          "text": "? Look at How They Handled Trump"
+        }
       ],
       "source": "https://example.com",
       "note": "One sentence on why this framing is a euphemism.",
       "expires": "2026-08-09T00:00:00Z"
-    }
-    ,
+    },
     {
       "id": "2026-08-07-d",
       "headline": "Activists Tell of Abuse in Israeli Custody",
       "ops": [
-        { "t": "strike", "start": 10, "len": 8 },
-        { "t": "insert", "at": 18, "text": "Claim " }
+        {
+          "t": "strike",
+          "start": 10,
+          "len": 8
+        },
+        {
+          "t": "insert",
+          "at": 18,
+          "text": "Claim "
+        }
       ],
       "source": "https://example.com",
       "note": "'tell' has the flavor of actually describing a real event. The story, however, cites claims by the activists, but no independently verified or verifiable evidence other than what was said by activists whose mission was to call attention to their cause'",
       "expires": "2026-08-09T00:00:00Z"
     },
-  {
-    "id": "2026-08-07-e",
-    "headline": "Cassidy Will Back Blanche, Salvaging His Confirmation",
-    "ops": [
-      {
-        "t": "insert",
-        "at": 7,
-        "text": ", Having Destroyed Medicine,"
-      },
-      {
-        "t": "strike",
-        "start": 27,
-        "len": 26
-      },
-      {
-        "t": "insert",
-        "at": 53,
-        "text": "to Destroy Law"
-      }
-    ],
-    "source": "https://example.com",
-    "note": "One sentence on why this framing is a euphemism.",
-    "expires": "2026-08-09T00:00:00Z"
-  },
+    {
+      "id": "2026-08-07-e",
+      "headline": "Cassidy Will Back Blanche, Salvaging His Confirmation",
+      "ops": [
+        {
+          "t": "insert",
+          "at": 7,
+          "text": ", Having Destroyed Medicine,"
+        },
+        {
+          "t": "strike",
+          "start": 27,
+          "len": 26
+        },
+        {
+          "t": "insert",
+          "at": 53,
+          "text": "to Destroy Law"
+        }
+      ],
+      "source": "https://example.com",
+      "note": "One sentence on why this framing is a euphemism.",
+      "expires": "2026-08-09T00:00:00Z"
+    },
     {
       "id": "2026-08-07-f",
       "headline": "Trump Vowed to Thwart Iran's Nuclear Program. Here's Where That Stands.",
       "ops": [
-        { "t": "insert", "at": 71, "text": " (He Makes Lots of Vows)" }
+        {
+          "t": "insert",
+          "at": 71,
+          "text": " (He Makes Lots of Vows)"
+        }
       ],
       "source": "https://example.com",
+      "note": "",
+      "expires": "2026-08-09T00:00:00Z"
+    },
+    {
+      "id": "2026-08-07-i",
+      "headline": "Trump Restarts Battle to Fire Sitting Fed Governor",
+      "ops": [
+        {
+          "t": "insert",
+          "at": 0,
+          "text": "Abusing the Infinite Legal Resources of the DOJ, "
+        }
+      ],
+      "source": "https://www.nytimes.com/2026/08/07/business/trump-lisa-cook-fed.html",
       "note": "",
       "expires": "2026-08-09T00:00:00Z"
     }
