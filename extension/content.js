@@ -15,42 +15,11 @@
 
   // ---------------------------------------------------------------- normalize
   //
-  // Produces a normalized string plus a map back to the original character
-  // indices, so annotation offsets computed against the normalized form can be
-  // applied to the real DOM text.
+  // Shared with the editor via match.js, which the manifest loads first. Both
+  // must agree on what a headline is, or the editor emits annotations that
+  // silently never render.
 
-  const PUNCT = {
-    "\u2018": "'", "\u2019": "'", "\u201A": "'", "\u201B": "'",
-    "\u201C": '"', "\u201D": '"', "\u201E": '"', "\u201F": '"',
-    "\u2013": "-", "\u2014": "-", "\u2212": "-",
-    "\u00A0": " ", "\u2009": " ", "\u202F": " ", "\u200A": " "
-  };
-
-  function normalize(raw) {
-    const out = [];
-    const map = []; // map[i] = index into raw
-    let pendingSpace = false;
-
-    for (let i = 0; i < raw.length; i++) {
-      let ch = raw[i];
-      if (PUNCT[ch]) ch = PUNCT[ch];
-
-      if (/\s/.test(ch)) {
-        pendingSpace = out.length > 0;
-        continue;
-      }
-      if (pendingSpace) {
-        out.push(" ");
-        map.push(i);
-        pendingSpace = false;
-      }
-      out.push(ch);
-      map.push(i);
-    }
-    return { text: out.join(""), map };
-  }
-
-  const key = (s) => normalize(s).text.toLowerCase();
+  const { normalize, key } = PS_MATCH;
 
   // ------------------------------------------------------------ text indexing
   //
@@ -80,25 +49,7 @@
   // ancestor container may also "contain" the headline, and rewriting that would
   // destroy neighbouring content.
 
-  function findTarget(headlineKey) {
-    const nodes = document.querySelectorAll(
-      "h1, h2, h3, h4, p, span, a, div"
-    );
-    let best = null;
-    for (const el of nodes) {
-      if (el.hasAttribute(DONE_ATTR)) continue;
-      if (el.childElementCount > 4) continue;
-      const txt = el.textContent;
-      if (!txt || txt.length > 400) continue;
-      if (key(txt) !== headlineKey) continue;
-      if (!best || el.compareDocumentPosition(best) & Node.DOCUMENT_POSITION_CONTAINS) {
-        best = el;
-      } else if (best.contains(el)) {
-        best = el;
-      }
-    }
-    return best;
-  }
+  const findTarget = (headlineKey) => PS_MATCH.findTarget(headlineKey, DONE_ATTR);
 
   // ------------------------------------------------------------------- render
 
@@ -111,8 +62,7 @@
 
   function applyOps(el, ann) {
     const flat = flatten(el);
-    const norm = normalize(flat.raw);
-    const nText = norm.text;
+    const nText = normalize(flat.raw);
 
     // Sort descending so applying one op never shifts the offsets of the next.
     const ops = [...ann.ops].sort((a, b) => {

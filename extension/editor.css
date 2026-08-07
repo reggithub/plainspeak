@@ -1,0 +1,169 @@
+/* Plainspeak editor chrome.
+ *
+ * Everything is scoped under #ps-editor and states its own values, because this
+ * panel sits inside the publisher's stylesheet and inherits whatever it feels
+ * like otherwise. The preview deliberately does NOT reset .ps-ins / .ps-del --
+ * those come from annotate.css so the preview matches the page exactly.
+ */
+
+#ps-editor {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(560px, 46vw);
+  z-index: 2147483001;
+  display: flex;
+  flex-direction: column;
+  background: #fbfbf9;
+  border-left: 1px solid #d8d4cc;
+  box-shadow: -8px 0 28px rgba(0, 0, 0, 0.18);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #1a1a1a;
+}
+
+#ps-editor * { box-sizing: border-box; }
+
+.ps-ed-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  border-bottom: 1px solid #e4e0d8;
+}
+
+.ps-ed-bar strong { font-size: 13px; letter-spacing: 0.01em; }
+.ps-ed-sub { color: #6b6b6b; font-size: 11px; }
+.ps-ed-bar .ps-ed-btn:first-of-type { margin-left: auto; }
+
+.ps-ed-btn {
+  font: inherit;
+  font-size: 11px;
+  padding: 4px 9px;
+  border: 1px solid #cfcac0;
+  border-radius: 3px;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+}
+.ps-ed-btn:hover { background: #f2efe9; }
+.ps-ed-primary { background: #c0261f; border-color: #c0261f; color: #fff; }
+.ps-ed-primary:hover { background: #a81f19; }
+
+.ps-ed-list { flex: 1; overflow-y: auto; padding: 4px 0; }
+
+.ps-ed-row { padding: 9px 12px; border-bottom: 1px solid #eeebe4; }
+.ps-ed-row.ps-ed-changed { background: #fff8f7; }
+
+.ps-ed-head { display: flex; align-items: baseline; gap: 6px; }
+
+.ps-ed-tag {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #9a9a9a;
+  flex: 0 0 auto;
+}
+
+.ps-ed-orig {
+  font-size: 11px;
+  color: #7a7a7a;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ps-ed-orig:hover { color: #c0261f; text-decoration: underline; }
+
+.ps-ed-input {
+  margin-top: 5px;
+  padding: 6px 8px;
+  border: 1px solid #ddd8ce;
+  border-radius: 3px;
+  background: #fff;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  line-height: 1.3;
+  outline: none;
+  white-space: pre-wrap;
+}
+.ps-ed-input:focus { border-color: #c0261f; box-shadow: 0 0 0 2px rgba(192, 38, 31, 0.12); }
+
+/* Preview inherits .ps-ins / .ps-del from annotate.css on purpose. */
+.ps-ed-preview:not(:empty) {
+  margin-top: 6px;
+  padding: 6px 8px;
+  background: #fff;
+  border: 1px dashed #ddd8ce;
+  border-radius: 3px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.ps-ed-meta { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+
+.ps-ed-meta input {
+  font: inherit;
+  font-size: 11px;
+  padding: 3px 6px;
+  border: 1px solid #ddd8ce;
+  border-radius: 3px;
+  background: #fff;
+  color: #333;
+  min-width: 0;
+  flex: 1 1 0;
+}
+.ps-ed-meta input:focus { outline: none; border-color: #c0261f; }
+
+.ps-ed-status { font-size: 10px; color: #8a8a8a; flex: 0 0 auto; white-space: nowrap; }
+.ps-ed-status.ps-ed-bad { color: #c0261f; font-weight: 600; }
+
+.ps-ed-reset {
+  font: inherit;
+  font-size: 10px;
+  padding: 2px 6px;
+  border: 1px solid #e0dbd2;
+  border-radius: 3px;
+  background: #fff;
+  color: #777;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.ps-ed-empty { padding: 20px 14px; color: #8a8a8a; font-size: 12px; }
+
+.ps-ed-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid #e4e0d8;
+  background: #fff;
+}
+.ps-ed-foot .ps-ed-btn { margin-left: auto; }
+
+#ps-editor textarea {
+  height: 168px;
+  padding: 8px 12px;
+  border: none;
+  border-top: 1px solid #e4e0d8;
+  background: #22201d;
+  color: #e8e4dc;
+  font-family: Consolas, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.45;
+  resize: none;
+  outline: none;
+  white-space: pre;
+}
+
+/* Flash on the real page element when its row is clicked. */
+.ps-ed-flash {
+  outline: 3px solid #c0261f !important;
+  outline-offset: 2px;
+  transition: outline-color 0.4s;
+}
