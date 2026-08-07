@@ -14,17 +14,5 @@
       "note": "Trial 4",
       "expires": "2026-08-09T00:00:00Z"
     }
-    {
-      "id": "2026-08-06-smoketes2t",
-      "headline": "Lawmaker of Assault Loses Support from 2 Fellow Republican Houses Members",
-      "ops": [
-
-        { "t": "insert", "at": 25, "text": "Who Support a President Accused of Assault " 
-        }
-      ],
-      "source": "https://example.com",
-      "note": "Trial 5",
-      "expires": "2026-08-09T00:00:00Z"
-    }
   ]
 }
