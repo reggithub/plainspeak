@@ -110,7 +110,11 @@
         s.setAttribute("aria-label", "struck by Plainspeak: " + p.text);
         frag.appendChild(s);
       } else {
-        const s = span("ps-ins", p.text);
+        // A script-face comma or period carries wide left side bearing, which
+        // reads as a space after the publisher's last letter. CSS cannot select
+        // on content, so flag it here and let the stylesheet pull it back.
+        const tight = /^[,.;:!?)\]]/.test(p.text);
+        const s = span("ps-ins" + (tight ? " ps-tight" : ""), p.text);
         s.setAttribute("aria-label", "Plainspeak annotation: " + p.text);
         frag.appendChild(s);
       }

@@ -16,14 +16,28 @@
   font-style: normal;
   font-weight: 600;
   letter-spacing: 0.01em;
-  /* No horizontal padding. Op text carries its own spacing -- the diff
-   * generator decides whether an insert needs a leading or trailing space --
-   * and padding here double-spaces it. Worse, an insert that opens with
-   * punctuation renders as "Cassidy , Future Lobbyist," with a gap before the
-   * comma, which no offset can fix. */
-  padding: 0;
   white-space: normal;
 }
+
+/* Op text carries its own spacing -- the diff generator decides whether an
+ * insert needs a leading or trailing space -- so any box spacing here is
+ * doubled, and an insert opening with punctuation reads "Cassidy , Future
+ * Lobbyist," with a gap before the comma that no offset can close.
+ *
+ * !important because we are a guest in the publisher's stylesheet. A rule as
+ * ordinary as `h3 span { margin: 0 2px }` outranks a bare class, so simply
+ * declaring zero is not enough to win. */
+.ps-ins,
+.ps-del {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Set by content.js when the insert opens with punctuation. The script faces
+ * draw a comma with wide left side bearing, so ", Future Lobbyist," lands a
+ * visible gap after "Cassidy" even at zero margin. Ordinary word inserts keep
+ * their natural spacing. Tune the value here if it over- or under-corrects. */
+.ps-ins.ps-tight { margin-left: -0.14em !important; }
 
 .ps-del {
   text-decoration: line-through;
