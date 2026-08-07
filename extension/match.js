@@ -80,6 +80,22 @@
     return false;
   }
 
+  // Elements whose presence means the text is laid out in blocks. Annotating
+  // works by rebuilding an element's contents as text plus annotation spans,
+  // which flattens whatever was inside it -- fine for a headline, destructive
+  // for a card, where the kicker, headline and badge are separate blocks and
+  // collapse onto one line.
+  const BLOCKISH = "p, div, h1, h2, h3, h4, h5, h6, ul, ol, li, section, " +
+                   "article, header, footer, figure, figcaption, blockquote, br";
+
+  // Whether annotating this element would preserve the page. Nothing may be
+  // annotated unless this holds -- a mis-keyed annotation must render nothing,
+  // never damage the publisher's layout.
+  function safeToRewrite(el) {
+    if (el.querySelector(BLOCKISH)) return false;
+    return !hasSeam(el);
+  }
+
   // Separates story headlines from the summaries, blurbs, cards and nav text that
   // share the same shape.
   //
@@ -146,6 +162,9 @@
       const text = normalize(txt);
       if (!text || text.split(" ").length < o.minWords) continue;
 
+      // Never offer what the matcher will refuse to touch.
+      if (!safeToRewrite(el)) continue;
+
       const k = text.toLowerCase();
       const prev = byKey.get(k);
       if (!prev || prev.el.contains(el)) {
@@ -172,6 +191,10 @@
       if (!txt || txt.length > MAX_LEN) continue;
       if (key(txt) !== headlineKey) continue;
 
+      // A match is not enough. Rewriting a container flattens its blocks and
+      // wrecks the page, so an annotation keyed to one renders nothing instead.
+      if (!safeToRewrite(el)) continue;
+
       if (!best || best.contains(el)) best = el;
     }
     return best;
@@ -179,7 +202,7 @@
 
   const api = {
     PUNCT, normalize, key, candidates, findTarget, classify, hasSeam,
-    markContainers, SELECTOR
+    markContainers, safeToRewrite, SELECTOR
   };
   if (typeof module === "object" && module.exports) module.exports = api;
   else root.PS_MATCH = api;

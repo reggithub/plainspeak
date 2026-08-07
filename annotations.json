@@ -120,16 +120,21 @@
       "expires": "2026-08-09T00:00:00Z"
     },
     {
-      "id": "2026-08-07-h",
-      "headline": "Times InvestigationHow the Reflecting Pool Came to Mirror Trump's Washington11 min read",
+      "id": "2026-08-07-i",
+      "headline": "Trump Restarts Battle to Fire Sitting Fed Governor",
       "ops": [
         {
           "t": "insert",
-          "at": 27,
-          "text": "Fouled "
+          "at": 0,
+          "text": "Armed with the Infinite Legal Resources of the DOJ, "
+        },
+        {
+          "t": "insert",
+          "at": 50,
+          "text": " Despite SCOTUS Ruling"
         }
       ],
-      "source": "https://www.nytimes.com/2026/08/07/us/politics/reflecting-pool-trump-administration.html",
+      "source": "https://www.nytimes.com/2026/08/07/business/trump-lisa-cook-fed.html",
       "note": "",
       "expires": "2026-08-09T00:00:00Z"
     }

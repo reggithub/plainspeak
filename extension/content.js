@@ -77,9 +77,10 @@
       if (op.t === "strike" && pos + op.len > nText.length) return false;
     }
 
-    // Rebuild the element's text content with annotation spans woven in.
-    // Inner markup inside the headline is not preserved; headlines rarely carry
-    // meaningful markup, and this is far more robust than Range surgery.
+    // Rebuild the element's text content with annotation spans woven in. This
+    // flattens whatever markup was inside, which is why findTarget refuses any
+    // element containing block-level children: flattening a card collapsed its
+    // kicker, headline and badge onto one line and mangled the page.
     const pieces = []; // {type, text}
     let cursor = 0;
     const asc = [...ops].reverse();

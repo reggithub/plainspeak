@@ -5,7 +5,7 @@
  * cases below are the NYT front-page card shapes it has to get right.
  */
 
-const { classify, normalize, key, hasSeam } = require("../extension/match.js");
+const { classify, normalize, key, hasSeam, safeToRewrite } = require("../extension/match.js");
 
 let failures = 0;
 
@@ -88,6 +88,30 @@ const SEAMS = [
 
 for (const [label, el, want] of SEAMS) {
   const got = hasSeam(el);
+  if (got === want) console.log("  ok   " + label);
+  else { failures++; console.log("  FAIL " + label + " -> " + got + ", want " + want); }
+}
+
+console.log("\nsafeToRewrite - annotating flattens an element, so blocks inside are fatal");
+
+// querySelector is the only DOM call safeToRewrite makes beyond hasSeam.
+const target = (sel, kids) => ({
+  querySelector: (q) => (sel ? { tag: sel } : null),
+  childNodes: kids || [node("A Perfectly Ordinary Headline")]
+});
+
+const SAFE = [
+  ["plain headline, one text node", target(null), true],
+  ["headline with an inline <em>", target(null,
+    [node("Trump Says "), node("No Deal"), node(" to Congress")]), true],
+  ["card containing a <p>", target("p"), false],
+  ["anything containing a <br>", target("br"), false],
+  ["no blocks but text runs together", target(null,
+    [node("Times Investigation"), node("How the Pool")]), false]
+];
+
+for (const [label, el, want] of SAFE) {
+  const got = safeToRewrite(el);
   if (got === want) console.log("  ok   " + label);
   else { failures++; console.log("  FAIL " + label + " -> " + got + ", want " + want); }
 }
