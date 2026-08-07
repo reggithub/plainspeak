@@ -2,10 +2,10 @@
   "publication": "The New York Times",
   "annotations": [
     {
-      "id": "2026-08-06-a",
-      "headline": "Senate Committee Votes to Hold Fauci in Contempt of Congress",
+      "id": "2026-08-07-a",
+      "headline": "Trump Again Targets Birthright Citizenship, in Two Executive Orders",
       "ops": [
-        { "t": "strike", "start": 25, "len": 4 },
+        { "t": "strike", "start": 13, "len": 10 },
         { "t": "insert", "at": 29, "text": "REPLACEMENT" }
       ],
       "source": "https://example.com",
