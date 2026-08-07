@@ -1,16 +1,25 @@
 {
   "publication": "The New York Times",
-  "annotations": 
-  [
+  "annotations": [
     {
-      "id": "2026-08-06-smoketest",
+      "id": "2026-08-06-a",
       "headline": "Senate Committee Votes to Hold Fauci in Contempt of Congress",
       "ops": [
-        { "t": "insert", "at": 0, "text": "Imperial Republican " 
-        }
+        { "t": "strike", "start": 25, "len": 4 },
+        { "t": "insert", "at": 29, "text": "REPLACEMENT" }
       ],
       "source": "https://example.com",
-      "note": "Trial 4",
+      "note": "One sentence on why this framing is a euphemism.",
+      "expires": "2026-08-09T00:00:00Z"
+    },
+    {
+      "id": "2026-08-06-b",
+      "headline": "How Fauci Got to This Point and the Legal Peril He Faces",
+      "ops": [
+        { "t": "insert", "at": 0, "text": "ANOTHER" }
+      ],
+      "source": "https://example.com",
+      "note": "Second annotation.",
       "expires": "2026-08-09T00:00:00Z"
     }
   ]
