@@ -210,13 +210,32 @@
 
 .ps-ed-foot {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 6px 8px;
   padding: 8px 12px;
   border-top: 1px solid #e4e0d8;
   background: #fff;
 }
-.ps-ed-foot .ps-ed-btn:first-of-type { margin-left: auto; }
+
+/* Its own line, and truncating rather than growing. Sharing a row with the
+ * buttons is what pushed them off the edge of the panel. */
+.ps-ed-foot #ps-ed-count {
+  flex: 1 1 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Buttons wrap among themselves before they ever leave the panel. */
+.ps-ed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  width: 100%;
+}
 .ps-ed-foot .ps-ed-btn { white-space: nowrap; }
 
 #ps-editor textarea {

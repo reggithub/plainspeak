@@ -5,7 +5,7 @@
  * cases below are the NYT front-page card shapes it has to get right.
  */
 
-const { classify, normalize, key } = require("../extension/match.js");
+const { classify, normalize, key, hasSeam } = require("../extension/match.js");
 
 let failures = 0;
 
@@ -55,6 +55,42 @@ check("summary before heading in the same card marks both",
 check("three-deck card: headline, summary, byline",
   [{ tag: "p", href: A }, { tag: "p", href: A }, { tag: "span", href: A }],
   ["headline", "text", "text"]);
+
+check("a card wrapping other candidates is not a headline",
+  [{ tag: "div", href: A, container: true }, { tag: "p", href: A }],
+  ["text", "headline"]);
+
+check("run-together text is not a headline",
+  [{ tag: "div", href: A, seam: true }, { tag: "p", href: A }],
+  ["text", "headline"]);
+
+console.log("\nseam detection");
+
+// hasSeam only touches childNodes/textContent, so plain objects stand in for
+// the DOM. Each case is markup from an NYT front, written out as nodes.
+const node = (t) => ({ textContent: t });
+const elem = (...kids) => ({ childNodes: kids });
+
+const SEAMS = [
+  ["kicker + headline + badge run together",
+    elem(node("Times Investigation"), node("How the Pool Came to Mirror"), node("11 min read")), true],
+  ["headline followed by a reading badge",
+    elem(node("Meta Ordered to Pay $567 Million"), node("2 min read")), true],
+  ["inline emphasis inside a headline",
+    elem(node("Trump Says "), node("No Deal"), node(" to Congress")), false],
+  ["a single text node",
+    elem(node("Cassidy Will Back Blanche, Salvaging His Confirmation")), false],
+  ["children separated by whitespace nodes",
+    elem(node("Senate Passes"), node(" "), node("the Bill")), false],
+  ["empty nodes are skipped, not treated as separators",
+    elem(node("Activists Tell"), node(""), node("of Abuse")), true]
+];
+
+for (const [label, el, want] of SEAMS) {
+  const got = hasSeam(el);
+  if (got === want) console.log("  ok   " + label);
+  else { failures++; console.log("  FAIL " + label + " -> " + got + ", want " + want); }
+}
 
 console.log("\nnormalize");
 

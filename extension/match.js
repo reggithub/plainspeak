@@ -60,14 +60,42 @@
     return null;
   }
 
-  // Separates story headlines from the summaries, blurbs and nav text that share
-  // the same shape. Two signals: a real heading tag is always a headline, and
-  // within one article card the FIRST piece of text is the headline (the rest is
-  // the summary). Deliberately generous -- the editor still offers everything
-  // under its "all" view, so a misfire here hides a headline rather than losing it.
+  // True when this element's text is several pieces run together rather than one
+  // run of prose. textContent concatenates children with no separator, so a card
+  // wrapping a kicker, a headline and a badge yields
+  //
+  //   "Times InvestigationHow the Fouled Reflecting Pool...Washington11 min read"
+  //
+  // The seam is the giveaway: a child boundary with no whitespace either side.
+  // A headline with inline markup -- "Trump Says <em>No</em> to the Deal" -- has
+  // spaces around its children and shows no seam.
+  function hasSeam(el) {
+    let prevEnd = "";
+    for (const node of el.childNodes) {
+      const t = node.textContent || "";
+      if (!t) continue;
+      if (prevEnd && !/\s/.test(prevEnd) && !/\s/.test(t[0])) return true;
+      prevEnd = t[t.length - 1];
+    }
+    return false;
+  }
+
+  // Separates story headlines from the summaries, blurbs, cards and nav text that
+  // share the same shape.
+  //
+  //   seam or container -> not a headline. Something more precise sits inside it.
+  //   heading tag       -> headline.
+  //   first text in a card -> headline; whatever follows is the summary.
+  //
+  // Deliberately generous: the editor still offers everything under its "all"
+  // view, so a misfire hides a headline rather than losing it.
   function classify(list) {
     const claimed = new Set();
     for (const c of list) {
+      if (c.seam || c.container) {
+        c.kind = "text";
+        continue;
+      }
       if (/^h[1-4]$/.test(c.tag)) {
         c.kind = "headline";
         if (c.href) claimed.add(c.href);
@@ -77,6 +105,25 @@
       } else {
         c.kind = "text";
       }
+    }
+    return list;
+  }
+
+  // An element that wraps other candidates is a card, not a headline. Requires
+  // two element children so that <h3>Trump Says <em>No Deal</em></h3> -- one
+  // child, no seam -- is left alone. Headings are exempt: a heading holding
+  // sub-elements is still the headline.
+  function markContainers(list) {
+    const elems = new Set(list.map((c) => c.el));
+    const containers = new Set();
+
+    for (const c of list) {
+      for (let p = c.el.parentElement; p; p = p.parentElement) {
+        if (elems.has(p) && p.childElementCount >= 2) containers.add(p);
+      }
+    }
+    for (const c of list) {
+      c.container = containers.has(c.el) && !/^h[1-4]$/.test(c.tag);
     }
     return list;
   }
@@ -105,11 +152,12 @@
         byKey.set(k, {
           el, text, key: k,
           tag: el.tagName.toLowerCase(),
-          href: articleHref(el)
+          href: articleHref(el),
+          seam: hasSeam(el)
         });
       }
     }
-    return classify([...byKey.values()]);
+    return classify(markContainers([...byKey.values()]));
   }
 
   // The single deepest element matching one headline key, or null.
@@ -129,7 +177,10 @@
     return best;
   }
 
-  const api = { PUNCT, normalize, key, candidates, findTarget, classify, SELECTOR };
+  const api = {
+    PUNCT, normalize, key, candidates, findTarget, classify, hasSeam,
+    markContainers, SELECTOR
+  };
   if (typeof module === "object" && module.exports) module.exports = api;
   else root.PS_MATCH = api;
 })(typeof globalThis !== "undefined" ? globalThis : this);

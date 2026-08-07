@@ -190,10 +190,15 @@
       const file = buildFile();
       out.value = JSON.stringify(file, null, 2);
       // Naming the merge base matters: "feed" means anything committed but not
-      // pushed is not in this output, and saving would revert it.
+      // pushed is absent from this output, and saving would revert it. Kept
+      // terse so it cannot crowd the buttons; the detail is in the tooltip.
       count.textContent = file.annotations.length + " annotations · " +
-        (anns.length ? anns.length + " changed here" : "no changes yet") +
-        " · merging into " + (baseSource === "file" ? "the bound file" : "the published feed");
+        (anns.length ? anns.length + " changed" : "no changes") +
+        " · base: " + baseSource;
+      count.title = baseSource === "file"
+        ? "Merging into the bound annotations.json on disk."
+        : "Merging into the published feed - anything committed but not pushed " +
+          "is missing from this output, and saving would revert it.";
     } else {
       out.value = anns.length ? JSON.stringify(anns, null, 2) : "";
       count.textContent = anns.length ? anns.length + " ready" : "none edited yet";
@@ -787,7 +792,12 @@
       setTimeout(() => { copy.textContent = "copy JSON"; }, 1600);
     });
 
-    foot.append(count, discard, mode, save, copy);
+    // Buttons in their own wrapping row. Flat in the footer they shared a line
+    // with the status text, which is long enough to push them out of a 560px
+    // panel entirely -- the save button simply was not on screen.
+    const actions = el("div", "ps-ed-actions");
+    actions.append(discard, mode, save, copy);
+    foot.append(count, actions);
     panel.append(foot, json);
 
     document.body.appendChild(panel);
