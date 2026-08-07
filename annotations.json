@@ -5,7 +5,7 @@
       "id": "2026-08-07-a",
       "headline": "Trump Again Targets Birthright Citizenship, in Two Executive Orders",
       "ops": [
-        { "t": "strike", "start": 12, "len": 10 },
+        { "t": "strike", "start": 12, "len": 7 },
         { "t": "insert", "at": 30, "text": "REPLACEMENT" }
       ],
       "source": "https://example.com",
