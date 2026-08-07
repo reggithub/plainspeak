@@ -4,7 +4,7 @@
   [
     {
       "id": "2026-08-06-smoketest",
-      "headline": "Mitch McConnell Announces Discharge From Rehabilitation Center",
+      "headline": "McConnell",
       "ops": [
 
         { "t": "insert", "at": 0, "text": "Statement Issued by Office of " 
