@@ -1,0 +1,83 @@
+/* Plainspeak annotation styling.
+ *
+ * Design constraint: an annotation must be unmistakably not-the-publisher's in a
+ * static screenshot, with no hover and no surrounding chrome. Three independent
+ * cues carry that: a script face against NYT's serif, a red that appears nowhere
+ * in their palette, and the strike rule. Colour alone is never load-bearing.
+ *
+ * A bundled webfont would be better than the system script stack, but font-src
+ * CSP makes that unreliable. Revisit if the stack looks wrong on Windows.
+ */
+
+.ps-ins {
+  font-family: "Bradley Hand", "Segoe Script", "Brush Script MT",
+               "Comic Sans MS", cursive;
+  color: #c0261f;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 0 0.18em;
+  white-space: normal;
+}
+
+.ps-del {
+  text-decoration: line-through;
+  text-decoration-color: #c0261f;
+  text-decoration-thickness: 2px;
+  opacity: 0.72;
+}
+
+.ps-cite {
+  font-family: "Bradley Hand", "Segoe Script", cursive;
+  color: #c0261f;
+  text-decoration: none;
+  font-size: 0.85em;
+  vertical-align: super;
+  padding-left: 0.15em;
+}
+
+.ps-cite:hover {
+  text-decoration: underline;
+}
+
+.ps-annotated {
+  position: relative;
+}
+
+/* Persistent per-annotation attribution: survives cropping into a screenshot. */
+.ps-annotated::after {
+  content: "PLAINSPEAK";
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #c0261f;
+  opacity: 0.65;
+  padding-left: 0.5em;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+#ps-badge {
+  position: fixed;
+  bottom: 12px;
+  left: 12px;
+  z-index: 2147483000;
+  background: #c0261f;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 11px;
+  line-height: 1.3;
+  padding: 6px 10px;
+  border-radius: 3px;
+  max-width: 280px;
+  pointer-events: none;
+  opacity: 0.92;
+}
+
+/* Alt+P */
+.ps-off .ps-ins,
+.ps-off .ps-cite,
+.ps-off #ps-badge { display: none; }
+.ps-off .ps-del { text-decoration: none; opacity: 1; }
+.ps-off .ps-annotated::after { content: none; }

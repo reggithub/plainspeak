@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Plainspeak",
+  "version": "0.1.0",
+  "description": "Reader's assistant. Renders Plainspeak's editorial annotations on headlines, marked as ours.",
+
+  "host_permissions": [
+    "https://www.nytimes.com/*",
+    "https://raw.githubusercontent.com/*"
+  ],
+
+  "background": { "service_worker": "background.js" },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.nytimes.com/",
+        "https://www.nytimes.com/section/*",
+        "https://www.nytimes.com/international/",
+        "https://www.nytimes.com/ca/"
+      ],
+      "js": ["content.js"],
+      "css": ["annotate.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
