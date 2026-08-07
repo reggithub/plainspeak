@@ -20,6 +20,7 @@
   let view = "headline";   // headline | all | edited | feed
   let feed = null;
   let query = "";
+  let whole = true;   // emit the entire annotations.json, not just new entries
   const tabs = [];
   const feedRows = [];
 
@@ -54,12 +55,26 @@
   // --------------------------------------------------------------- annotations
 
   // Rows the reader actually changed, as annotation objects.
+  // Next unused id for today. Allocating blindly from "a" is what produced two
+  // 2026-08-07-a entries in the file.
+  function freeId(day, used) {
+    for (let i = 0; i < 26; i++) {
+      const id = day + "-" + String.fromCharCode(97 + i);
+      if (!used.has(id)) { used.add(id); return id; }
+    }
+    let n = 1;
+    while (used.has(day + "-" + n)) n++;
+    used.add(day + "-" + n);
+    return day + "-" + n;
+  }
+
   function collect() {
     const day = todayId();
     const expires = defaultExpiry();
     const out = [];
 
-    let fresh = 0;
+    const used = new Set();
+    for (const a of (feed && feed.annotations) || []) if (a && a.id) used.add(a.id);
     for (const r of rows) {
       const edited = M.normalize(r.editBox.textContent);
       // Against the baseline, not the headline: an already-annotated row opens
@@ -73,7 +88,7 @@
       out.push({
         // Revising an existing annotation keeps its id, so pasting the result
         // replaces that entry rather than adding a duplicate of it.
-        id: r.annId || (day + "-" + String.fromCharCode(97 + fresh++)),
+        id: r.annId || freeId(day, used),
         headline: r.cand.text,
         ops,
         source: r.sourceBox.value.trim() || "https://example.com",
@@ -82,6 +97,41 @@
       });
     }
     return out;
+  }
+
+  // The whole of annotations.json: everything already in the feed, with this
+  // session's edits merged in by id and new entries appended. Entries for other
+  // pages are carried through untouched -- the feed is one file for the whole
+  // site, and only some of it is visible here.
+  //
+  // Resetting an annotated row back to the publisher's own wording removes that
+  // annotation, which is the only way to retire one from inside the editor.
+  function buildFile() {
+    const byId = new Map();
+    const order = [];
+    const src = base || feed;
+
+    for (const a of (src && src.annotations) || []) {
+      if (!a || typeof a !== "object" || Array.isArray(a)) continue;
+      const id = a.id || "";
+      if (!byId.has(id)) order.push(id);
+      byId.set(id, a);
+    }
+
+    for (const e of collect()) {
+      if (!byId.has(e.id)) order.push(e.id);
+      byId.set(e.id, e);
+    }
+
+    for (const r of rows) {
+      if (!r.annId) continue;
+      if (M.normalize(r.editBox.textContent) === r.cand.text) byId.delete(r.annId);
+    }
+
+    return {
+      publication: (src && src.publication) || "The New York Times",
+      annotations: order.filter((id) => byId.has(id)).map((id) => byId.get(id))
+    };
   }
 
   // ------------------------------------------------------------------- preview
@@ -133,9 +183,20 @@
 
     const anns = collect();
     const out = document.getElementById("ps-ed-json");
-    out.value = anns.length ? JSON.stringify(anns, null, 2) : "";
-    document.getElementById("ps-ed-count").textContent =
-      anns.length ? anns.length + " ready" : "none edited yet";
+    const count = document.getElementById("ps-ed-count");
+
+    if (whole) {
+      const file = buildFile();
+      out.value = JSON.stringify(file, null, 2);
+      // Naming the merge base matters: "feed" means anything committed but not
+      // pushed is not in this output, and saving would revert it.
+      count.textContent = file.annotations.length + " annotations · " +
+        (anns.length ? anns.length + " changed here" : "no changes yet") +
+        " · merging into " + (baseSource === "file" ? "the bound file" : "the published feed");
+    } else {
+      out.value = anns.length ? JSON.stringify(anns, null, 2) : "";
+      count.textContent = anns.length ? anns.length + " ready" : "none edited yet";
+    }
   }
 
   // ---------------------------------------------------------------------- rows
@@ -209,19 +270,35 @@
     return r;
   }
 
-  // Scroll the real page element into view. `force` is for an explicit click;
-  // on focus we leave it alone if it is already comfortably visible, so tabbing
-  // between fields does not yank the page around.
+  // Bring the headline being edited into view and keep it marked while you work
+  // on it, the way the reader's badge menu jumps to an annotation.
+  //
+  // The test is whether it sits in the middle band, not merely whether it is on
+  // screen: a headline clinging to the bottom edge is not where you are looking,
+  // and the panel covers the right of the viewport besides.
   function reveal(cand, force) {
     const el = cand.el;
-    if (!el.isConnected) return;
+    if (!el || !el.isConnected) return;
+
+    setActive(el);
 
     const box = el.getBoundingClientRect();
-    const visible = box.top >= 60 && box.bottom <= window.innerHeight - 40;
-    if (!force && visible) { flash(el); return; }
+    const h = window.innerHeight;
+    const centred = box.top >= h * 0.2 && box.bottom <= h * 0.8;
+    if (force || !centred) el.scrollIntoView({ block: "center", behavior: "smooth" });
 
-    el.scrollIntoView({ block: "center", behavior: "smooth" });
     flash(el);
+  }
+
+  // Persistent marker on the headline whose row has focus. Distinct from the
+  // flash, which fades: this one answers "which of these am I editing?".
+  function setActive(el) {
+    clearActive();
+    if (el) el.classList.add("ps-ed-active");
+  }
+
+  function clearActive() {
+    for (const n of document.querySelectorAll(".ps-ed-active")) n.classList.remove("ps-ed-active");
   }
 
   function flash(el) {
@@ -310,6 +387,119 @@
       if (!empty.hidden && query.trim()) {
         empty.textContent = "Nothing matches “" + query.trim() + "” in this view.";
       }
+    }
+  }
+
+  // ------------------------------------------------------------ save to project
+  //
+  // Chrome will not let an extension write an arbitrary path, so the file is
+  // bound once through a native picker and the handle is kept. Point it at the
+  // repo's annotations.json and later saves overwrite it in place.
+  //
+  // The handle lives in this origin's IndexedDB, so clearing site data for the
+  // publisher means picking the file again. Permission is re-checked on every
+  // save; the browser may re-prompt once per session.
+
+  const DB_NAME = "plainspeak", DB_STORE = "handles", DB_KEY = "annotations";
+  let fileHandle = null;
+
+  // What edits get merged into. The bound file when we can read it, otherwise
+  // the published feed.
+  //
+  // This matters more than it looks. The feed is what raw.githubusercontent.com
+  // is serving -- behind a five-minute background cache and another five at the
+  // CDN, and missing anything committed but not yet pushed. Merging into that
+  // and writing the result to disk silently reverts local work. The file on
+  // disk is the only honest base.
+  let base = null;
+  let baseSource = "feed";
+
+  async function readBound() {
+    if (!fileHandle) return null;
+    try {
+      if ((await fileHandle.queryPermission({ mode: "read" })) !== "granted") return null;
+      const parsed = JSON.parse(await (await fileHandle.getFile()).text());
+      return parsed && Array.isArray(parsed.annotations) ? parsed : null;
+    } catch (e) {
+      console.warn("[plainspeak] could not read bound file:", e && e.message);
+      return null;
+    }
+  }
+
+  async function loadBase() {
+    const onDisk = await readBound();
+    base = onDisk || feed;
+    baseSource = onDisk ? "file" : "feed";
+  }
+
+  function idb(mode, fn) {
+    return new Promise((resolve, reject) => {
+      const open = indexedDB.open(DB_NAME, 1);
+      open.onupgradeneeded = () => open.result.createObjectStore(DB_STORE);
+      open.onerror = () => reject(open.error);
+      open.onsuccess = () => {
+        const db = open.result;
+        const req = fn(db.transaction(DB_STORE, mode).objectStore(DB_STORE));
+        req.onsuccess = () => { resolve(req.result); db.close(); };
+        req.onerror = () => { reject(req.error); db.close(); };
+      };
+    });
+  }
+
+  function fallbackDownload(text) {
+    const blob = new Blob([text], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "annotations.json";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+
+  // Always writes the whole file. Writing only the changed entries would leave
+  // annotations.json holding a fragment of itself.
+  async function saveToProject() {
+    if (!window.showSaveFilePicker) {
+      fallbackDownload(JSON.stringify(buildFile(), null, 2) + "\n");
+      return "downloaded";
+    }
+
+    try {
+      // Permission first, and before any await that could outlive the click's
+      // user activation -- fileHandle was loaded when the panel opened.
+      if (fileHandle) {
+        let perm = await fileHandle.queryPermission({ mode: "readwrite" });
+        if (perm !== "granted") perm = await fileHandle.requestPermission({ mode: "readwrite" });
+        if (perm !== "granted") fileHandle = null;
+      }
+
+      if (!fileHandle) {
+        fileHandle = await window.showSaveFilePicker({
+          suggestedName: "annotations.json",
+          types: [{ description: "Plainspeak feed", accept: { "application/json": [".json"] } }]
+        });
+        await idb("readwrite", (s) => s.put(fileHandle, DB_KEY)).catch(() => {});
+      }
+
+      // Re-read immediately before merging. The panel may have been open for a
+      // while, and the file can have changed underneath it -- an edit in the
+      // IDE, a git pull, another save. Merging into a stale copy would undo it.
+      await loadBase();
+      const text = JSON.stringify(buildFile(), null, 2) + "\n";
+
+      const w = await fileHandle.createWritable();
+      await w.write(text);
+      await w.close();
+
+      // The file now holds what we merged, so a second save starts from it.
+      base = JSON.parse(text);
+      baseSource = "file";
+      refreshAll();
+      return "saved to " + fileHandle.name;
+    } catch (e) {
+      if (e && e.name === "AbortError") return "cancelled";
+      console.warn("[plainspeak] save failed:", e && e.message);
+      fallbackDownload(JSON.stringify(buildFile(), null, 2) + "\n");
+      return "picker failed - downloaded instead";
     }
   }
 
@@ -467,12 +657,42 @@
       addLiveRows(list);
       renderFeed(cands);
       refreshAll();
+      // Prefer the file on disk as the merge base once the handle is back.
+      handleReady.then(loadBase).then(refreshAll);
     });
 
     const foot = el("div", "ps-ed-foot");
     const count = el("span", "ps-ed-sub", "none edited yet");
     count.id = "ps-ed-count";
+    const mode = el("button", "ps-ed-btn", "whole file");
+    const save = el("button", "ps-ed-btn", "save to project");
     const copy = el("button", "ps-ed-btn ps-ed-primary", "copy JSON");
+
+    save.title = "Write the whole file to annotations.json. " +
+                 "The first save asks which file to bind to; after that it overwrites in place.";
+    save.addEventListener("click", async () => {
+      save.disabled = true;
+      const was = save.textContent;
+      save.textContent = "saving…";
+      const result = await saveToProject();
+      save.textContent = result;
+      save.disabled = false;
+      setTimeout(() => { save.textContent = was; }, 2600);
+    });
+
+    // Loaded now so the click handler can call requestPermission without
+    // spending its user activation on an await first.
+    const handleReady = idb("readonly", (s) => s.get(DB_KEY))
+      .then((h) => { if (h) { fileHandle = h; save.title = "Overwrites " + h.name; } })
+      .catch(() => {});
+    mode.title = "Whole file replaces annotations.json outright. " +
+                 "New entries only gives just what changed here.";
+    mode.addEventListener("click", () => {
+      whole = !whole;
+      mode.textContent = whole ? "whole file" : "new entries";
+      refreshAll();
+    });
+
     const json = el("textarea");
     json.id = "ps-ed-json";
     json.readOnly = true;
@@ -490,7 +710,7 @@
       setTimeout(() => { copy.textContent = "copy JSON"; }, 1600);
     });
 
-    foot.append(count, copy);
+    foot.append(count, mode, save, copy);
     panel.append(foot, json);
 
     document.body.appendChild(panel);
@@ -501,6 +721,7 @@
   function shut() {
     const p = document.getElementById(ID);
     if (p) p.remove();
+    clearActive();
     rows = [];
     feedRows.length = 0;
     query = "";

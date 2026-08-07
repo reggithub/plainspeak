@@ -50,6 +50,7 @@
   cursor: pointer;
 }
 .ps-ed-btn:hover { background: #f2efe9; }
+.ps-ed-btn:disabled { opacity: 0.55; cursor: default; }
 .ps-ed-on { background: #2f2c28; border-color: #2f2c28; color: #fff; }
 .ps-ed-on:hover { background: #2f2c28; }
 .ps-ed-primary { background: #c0261f; border-color: #c0261f; color: #fff; }
@@ -215,7 +216,8 @@
   border-top: 1px solid #e4e0d8;
   background: #fff;
 }
-.ps-ed-foot .ps-ed-btn { margin-left: auto; }
+.ps-ed-foot .ps-ed-btn:first-of-type { margin-left: auto; }
+.ps-ed-foot .ps-ed-btn { white-space: nowrap; }
 
 #ps-editor textarea {
   height: 168px;
@@ -237,4 +239,12 @@
   outline: 3px solid #c0261f !important;
   outline-offset: 2px;
   transition: outline-color 0.4s;
+}
+
+/* Stays on the headline whose row has focus, so it is always clear which one
+ * the panel is editing. The flash above wins while it lasts. */
+.ps-ed-active {
+  outline: 2px dashed #c0261f !important;
+  outline-offset: 3px;
+  background: rgba(192, 38, 31, 0.06) !important;
 }
