@@ -66,14 +66,9 @@
     "headline": "Cassidy Will Back Blanche, Salvaging His Confirmation",
     "ops": [
       {
-        "t": "strike",
-        "start": 0,
-        "len": 8
-      },
-      {
         "t": "insert",
-        "at": 8,
-        "text": "Having Destroyed Medicine, Cassidy, Future Lobbyist, "
+        "at": 7,
+        "text": ", Having Destroyed Medicine,"
       },
       {
         "t": "strike",
@@ -83,7 +78,7 @@
       {
         "t": "insert",
         "at": 53,
-        "text": "to Destroy Medicine"
+        "text": "to Destroy Law"
       }
     ],
     "source": "https://example.com",
