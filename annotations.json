@@ -4,9 +4,10 @@
   [
     {
       "id": "2026-08-06-smoketest",
-      "headline": "Senate Committee Votes to Hold Fauci in Contempt of Congress",
+      "headline": "McConnell Announces Discharge From Rehabilitation Center",
       "ops": [
-        { "t": "insert", "at": 0, "text": "Imperial Republican " 
+
+        { "t": "insert", "at": 0, "text": "Office of Mitch " 
         }
       ],
       "source": "https://example.com",
