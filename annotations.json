@@ -5,8 +5,8 @@
       "id": "2026-08-07-a",
       "headline": "Trump Again Targets Birthright Citizenship, in Two Executive Orders",
       "ops": [
-        { "t": "strike", "start": 13, "len": 10 },
-        { "t": "insert", "at": 29, "text": "REPLACEMENT" }
+        { "t": "strike", "start": 12, "len": 10 },
+        { "t": "insert", "at": 30, "text": "REPLACEMENT" }
       ],
       "source": "https://example.com",
       "note": "One sentence on why this framing is a euphemism.",
