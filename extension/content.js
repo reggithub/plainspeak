@@ -164,18 +164,33 @@
     applying = true;
     const now = Date.now();
 
-    for (const ann of feed.annotations || []) {
-      if (ann.expires && Date.parse(ann.expires) < now) continue;
-      const k = key(ann.headline);
-      const el = findTarget(k);
-      if (!el) continue;
-      applyOps(el, ann);
-    }
+    // The feed is hand-edited JSON. One malformed entry must not take the rest
+    // of it down, and must not leave `applying` stuck true -- that would wedge
+    // the observer and stop every later run, not just this one.
+    try {
+      for (const ann of feed.annotations || []) {
+        if (!ann || typeof ann !== "object" || typeof ann.headline !== "string") {
+          console.warn("[plainspeak] skipping malformed feed entry:", ann);
+          continue;
+        }
+        if (ann.expires && Date.parse(ann.expires) < now) continue;
 
-    // Count what is actually marked in the DOM. A module-level tally only ever
-    // grows, because run() re-fires on every mutation.
-    badge(document.querySelectorAll("[" + DONE_ATTR + "]").length);
-    applying = false;
+        const el = findTarget(key(ann.headline));
+        if (!el) continue;
+
+        try {
+          applyOps(el, ann);
+        } catch (e) {
+          console.warn("[plainspeak] " + (ann.id || "?") + " failed to apply:", e.message);
+        }
+      }
+
+      // Count what is actually marked in the DOM. A module-level tally only ever
+      // grows, because run() re-fires on every mutation.
+      badge(document.querySelectorAll("[" + DONE_ATTR + "]").length);
+    } finally {
+      applying = false;
+    }
   }
 
   let timer = null;

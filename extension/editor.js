@@ -17,7 +17,8 @@
   const ID = "ps-editor";
 
   let rows = [];   // {cand, edited, source, note, el refs}
-  let view = "headline";   // headline | all | edited
+  let view = "headline";   // headline | all | edited | feed
+  let feed = null;
   const tabs = [];
 
   // ------------------------------------------------------------------- helpers
@@ -195,6 +196,12 @@
   }
 
   function applyFilter() {
+    const isFeed = view === "feed";
+    const listBox = document.getElementById("ps-ed-list");
+    const feedBox = document.getElementById("ps-ed-feed");
+    if (listBox) listBox.hidden = isFeed;
+    if (feedBox) feedBox.hidden = !isFeed;
+
     let shown = 0;
     for (const r of rows) {
       const changed = r.node.classList.contains("ps-ed-changed");
@@ -210,7 +217,8 @@
     const counts = {
       headline: rows.filter((r) => r.cand.kind === "headline").length,
       all: rows.length,
-      edited: rows.filter((r) => r.node.classList.contains("ps-ed-changed")).length
+      edited: rows.filter((r) => r.node.classList.contains("ps-ed-changed")).length,
+      feed: feed ? (feed.annotations || []).length : 0
     };
     for (const t of tabs) {
       t.btn.textContent = t.label + " " + counts[t.view];
@@ -219,6 +227,93 @@
 
     const empty = document.getElementById("ps-ed-empty");
     if (empty) empty.hidden = shown > 0 || !rows.length;
+  }
+
+  // ----------------------------------------------------------------- feed view
+  //
+  // "Why is only one of my annotations showing?" answered on the page itself.
+  // An annotation renders only if its headline matches some element's whole text
+  // exactly, so the usual answer is that the stored headline is not what the
+  // page actually says.
+
+  function requestFeed(cb) {
+    try {
+      chrome.runtime.sendMessage({ type: "plainspeak:getFeed" }, (data) => {
+        cb(chrome.runtime.lastError ? null : data);
+      });
+    } catch {
+      cb(null);
+    }
+  }
+
+  // The page headline that looks most like this one, by shared words.
+  function nearest(headline, cands) {
+    const want = new Set(M.key(headline).split(" "));
+    let best = null, bestScore = 0;
+    for (const c of cands) {
+      const have = c.key.split(" ");
+      let hits = 0;
+      for (const w of have) if (want.has(w)) hits++;
+      const score = hits / Math.max(want.size, have.length);
+      if (score > bestScore) { bestScore = score; best = c; }
+    }
+    return bestScore >= 0.4 ? best : null;
+  }
+
+  function statusOf(ann, cands) {
+    if (ann.expires && Date.parse(ann.expires) < Date.now()) {
+      return { state: "expired", why: "expired " + ann.expires };
+    }
+    const esc = window.CSS && CSS.escape ? CSS.escape(ann.id || "") : ann.id;
+    if (document.querySelector('[data-plainspeak="' + esc + '"]')) {
+      return { state: "shown", why: "rendered on this page" };
+    }
+    if (M.findTarget(M.key(ann.headline || ""), null)) {
+      return { state: "pending", why: "matches, not applied yet - reload the page" };
+    }
+    return {
+      state: "missing",
+      why: "no element on this page has exactly this text",
+      near: nearest(ann.headline || "", cands)
+    };
+  }
+
+  function renderFeed(cands) {
+    const box = document.getElementById("ps-ed-feed");
+    if (!box) return;
+    box.textContent = "";
+
+    if (!feed) {
+      box.appendChild(el("div", "ps-ed-empty",
+        "Could not read the feed from the background worker."));
+      return;
+    }
+
+    const anns = feed.annotations || [];
+    for (const ann of anns) {
+      const s = statusOf(ann, cands);
+      const row = el("div", "ps-ed-frow");
+
+      const line = el("div", "ps-ed-head");
+      line.appendChild(el("span", "ps-ed-state ps-ed-" + s.state, s.state));
+      line.appendChild(el("span", "ps-ed-fid", ann.id || "(no id)"));
+      row.appendChild(line);
+
+      row.appendChild(el("div", "ps-ed-fhead", ann.headline || ""));
+      row.appendChild(el("div", "ps-ed-sub", s.why));
+
+      if (s.near) {
+        const hint = el("div", "ps-ed-near");
+        hint.appendChild(el("span", "ps-ed-sub", "page says: "));
+        const t = el("span", "ps-ed-orig", s.near.text);
+        t.addEventListener("click", () => reveal(s.near, true));
+        hint.appendChild(t);
+        row.appendChild(hint);
+      }
+      box.appendChild(row);
+    }
+
+    if (!anns.length) box.appendChild(el("div", "ps-ed-empty", "The feed is empty."));
   }
 
   // -------------------------------------------------------------------- panel
@@ -237,7 +332,8 @@
     bar.appendChild(el("span", "ps-ed-sub", heads + " of " + cands.length + " matchable"));
 
     tabs.length = 0;
-    for (const [v, label] of [["headline", "headlines"], ["all", "all"], ["edited", "edited"]]) {
+    for (const [v, label] of [["headline", "headlines"], ["all", "all"],
+                              ["edited", "edited"], ["feed", "feed"]]) {
       const btn = el("button", "ps-ed-btn", label);
       btn.addEventListener("click", () => { view = v; applyFilter(); });
       tabs.push({ view: v, label, btn });
@@ -261,7 +357,19 @@
     empty.id = "ps-ed-empty";
     empty.hidden = true;
     list.appendChild(empty);
+    list.id = "ps-ed-list";
     panel.appendChild(list);
+
+    const feedBox = el("div", "ps-ed-list");
+    feedBox.id = "ps-ed-feed";
+    feedBox.hidden = true;
+    panel.appendChild(feedBox);
+
+    requestFeed((data) => {
+      feed = data;
+      renderFeed(cands);
+      applyFilter();
+    });
 
     const foot = el("div", "ps-ed-foot");
     const count = el("span", "ps-ed-sub", "none edited yet");

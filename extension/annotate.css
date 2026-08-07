@@ -16,7 +16,12 @@
   font-style: normal;
   font-weight: 600;
   letter-spacing: 0.01em;
-  padding: 0 0.18em;
+  /* No horizontal padding. Op text carries its own spacing -- the diff
+   * generator decides whether an insert needs a leading or trailing space --
+   * and padding here double-spaces it. Worse, an insert that opens with
+   * punctuation renders as "Cassidy , Future Lobbyist," with a gap before the
+   * comma, which no offset can fix. */
+  padding: 0;
   white-space: normal;
 }
 

@@ -66,8 +66,16 @@
       "source": "https://example.com",
       "note": "One sentence on why this framing is a euphemism.",
       "expires": "2026-08-09T00:00:00Z"
+    },
+    {
+      "id": "2026-08-07-f",
+      "headline": "Trump Vowed to Thwart Iran's Nuclear Program. Here's Where That Stands.",
+      "ops": [
+        { "t": "insert", "at": 71, "text": " (He Makes Lots of Vows)" }
+      ],
+      "source": "https://example.com",
+      "note": "",
+      "expires": "2026-08-09T00:00:00Z"
     }
-
-    
   ]
 }

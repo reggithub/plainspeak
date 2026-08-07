@@ -83,6 +83,12 @@ for (const ann of anns) {
              " then keeps " + JSON.stringify(h.slice(end, end + 12)));
       }
     } else if (op.t === "insert") {
+      // Landing inside a word splits it: at 6 on "Cassidy" yields
+      // "Cassid, Future Lobbyist,y". Usually an offset that is off by one.
+      if (pos > 0 && pos < h.length && h[pos - 1] !== " " && h[pos] !== " ") {
+        err("insert lands inside a word: " + JSON.stringify(h.slice(0, pos)) +
+            " + insert + " + JSON.stringify(h.slice(pos)));
+      }
       if (typeof op.text !== "string" || !op.text) err("insert has no text");
       else if (/^\s|\s\s|\s$/.test(op.text) && /\s\s/.test(op.text)) {
         warn("insert text has doubled spaces: " + JSON.stringify(op.text));

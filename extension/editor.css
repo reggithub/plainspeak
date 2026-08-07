@@ -142,6 +142,36 @@
 
 .ps-ed-empty { padding: 20px 14px; color: #8a8a8a; font-size: 12px; }
 
+/* ---- feed view: which annotations actually rendered here, and why not ---- */
+
+.ps-ed-frow { padding: 9px 12px; border-bottom: 1px solid #eeebe4; }
+
+.ps-ed-state {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 1px 5px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+  color: #fff;
+  background: #9a9a9a;
+}
+.ps-ed-state.ps-ed-shown { background: #2e7d4f; }
+.ps-ed-state.ps-ed-missing { background: #c0261f; }
+.ps-ed-state.ps-ed-expired { background: #8a8a8a; }
+.ps-ed-state.ps-ed-pending { background: #b8860b; }
+
+.ps-ed-fid { font-size: 10px; color: #9a9a9a; font-family: Consolas, monospace; }
+
+.ps-ed-fhead {
+  margin-top: 3px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.ps-ed-near { margin-top: 3px; display: flex; gap: 4px; align-items: baseline; }
+
 .ps-ed-foot {
   display: flex;
   align-items: center;
