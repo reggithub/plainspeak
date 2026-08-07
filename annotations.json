@@ -11,6 +11,17 @@
       "source": "https://example.com",
       "note": "One sentence on why this framing is a euphemism.",
       "expires": "2026-08-09T00:00:00Z"
+    },
+        {
+      "id": "2026-08-07-a",
+      "headline": "Blanche's Nomination for Attorney General",
+      "ops": [
+  
+        { "t": "insert", "at": 0, "text": "Trump's Sometimes Personal Lawyer Tod " }
+      ],
+      "source": "https://example.com",
+      "note": "One sentence on why this framing is a euphemism.",
+      "expires": "2026-08-09T00:00:00Z"
     }
   ]
 }
