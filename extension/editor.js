@@ -19,7 +19,18 @@
   let rows = [];   // {cand, edited, source, note, el refs}
   let view = "headline";   // headline | all | edited | feed
   let feed = null;
+  let query = "";
   const tabs = [];
+  const feedRows = [];
+
+  // Every whitespace-separated term must appear, so "cassidy blanche" finds the
+  // headline with both regardless of order. Matched against the normalized form
+  // so curly quotes and odd spacing in the page text do not defeat a search.
+  function matches(text) {
+    if (!query.trim()) return true;
+    const hay = M.key(text || "");
+    return M.key(query).split(" ").filter(Boolean).every((t) => hay.includes(t));
+  }
 
   // ------------------------------------------------------------------- helpers
 
@@ -48,20 +59,26 @@
     const expires = defaultExpiry();
     const out = [];
 
+    let fresh = 0;
     for (const r of rows) {
       const edited = M.normalize(r.editBox.textContent);
-      if (!edited || edited === r.cand.text) continue;
+      // Against the baseline, not the headline: an already-annotated row opens
+      // showing its current rewrite, and only belongs in the output once you
+      // change it further.
+      if (!edited || edited === r.baseline || edited === r.cand.text) continue;
 
       const ops = D.buildOps(r.cand.text, edited);
       if (!ops.length) continue;
 
       out.push({
-        id: day + "-" + String.fromCharCode(97 + out.length),
+        // Revising an existing annotation keeps its id, so pasting the result
+        // replaces that entry rather than adding a duplicate of it.
+        id: r.annId || (day + "-" + String.fromCharCode(97 + fresh++)),
         headline: r.cand.text,
         ops,
         source: r.sourceBox.value.trim() || "https://example.com",
         note: r.noteBox.value.trim() || "",
-        expires
+        expires: r.expires || expires
       });
     }
     return out;
@@ -86,6 +103,9 @@
     const edited = M.normalize(r.editBox.textContent);
     const changed = edited && edited !== r.cand.text;
 
+    // "changed" drives the preview -- show the annotation whenever one exists.
+    // "dirty" drives the edited view and the output: work done this session.
+    r.node.classList.toggle("ps-ed-dirty", !!edited && edited !== r.baseline);
     r.node.classList.toggle("ps-ed-changed", !!changed);
     r.meta.hidden = !changed;
 
@@ -120,12 +140,19 @@
 
   // ---------------------------------------------------------------------- rows
 
-  function buildRow(cand) {
+  // `ann` is set when this row is an annotation already live on the page. The
+  // element's text has been rewritten by then, so the headline comes from the
+  // feed and the box opens on the current rewrite.
+  function buildRow(cand, ann) {
+    const baseline = ann ? D.readThrough(cand.text, ann.ops || []) : cand.text;
     const node = el("div", "ps-ed-row");
 
     const head = el("div", "ps-ed-head");
-    const tag = el("span", "ps-ed-tag", cand.tag);
-    if (cand.href) {
+    const tag = el("span", "ps-ed-tag", ann ? "annotated" : cand.tag);
+    if (ann) {
+      tag.classList.add("ps-ed-live");
+      tag.title = "already in annotations.json as " + ann.id;
+    } else if (cand.href) {
       tag.classList.add("ps-ed-story");
       tag.title = cand.href;
     }
@@ -135,7 +162,7 @@
     head.appendChild(orig);
     node.appendChild(head);
 
-    const editBox = el("div", "ps-ed-input", cand.text);
+    const editBox = el("div", "ps-ed-input", baseline);
     editBox.contentEditable = "plaintext-only";
     editBox.spellcheck = false;
     node.appendChild(editBox);
@@ -148,21 +175,28 @@
     const sourceBox = el("input");
     sourceBox.placeholder = "source URL";
     sourceBox.type = "url";
-    // The card's own link is almost always the right source, so prefill it.
-    if (cand.href) sourceBox.value = cand.href;
+    // An existing annotation keeps its own metadata; otherwise the card's own
+    // link is almost always the right source.
+    if (ann && ann.source) sourceBox.value = ann.source;
+    else if (cand.href) sourceBox.value = cand.href;
     const noteBox = el("input");
     noteBox.placeholder = "note - why this framing misleads";
+    if (ann && ann.note) noteBox.value = ann.note;
     const status = el("span", "ps-ed-status");
     const reset = el("button", "ps-ed-reset", "reset");
     meta.append(sourceBox, noteBox, status, reset);
     node.appendChild(meta);
 
-    const r = { cand, node, editBox, preview, meta, sourceBox, noteBox, status };
+    const r = {
+      cand, node, editBox, preview, meta, sourceBox, noteBox, status, baseline,
+      annId: ann ? ann.id : null,
+      expires: ann ? ann.expires : null
+    };
 
     editBox.addEventListener("input", refreshAll);
     sourceBox.addEventListener("input", refreshAll);
     noteBox.addEventListener("input", refreshAll);
-    reset.addEventListener("click", () => { editBox.textContent = cand.text; refreshAll(); });
+    reset.addEventListener("click", () => { editBox.textContent = baseline; refreshAll(); });
 
     orig.addEventListener("click", () => reveal(cand, true));
 
@@ -195,6 +229,35 @@
     setTimeout(() => el.classList.remove("ps-ed-flash"), 1200);
   }
 
+  // Headlines already annotated are skipped by candidates() -- they sit inside
+  // [data-plainspeak], and their text has been rewritten anyway, so it no longer
+  // matches the stored headline. Without this they vanish from the editor the
+  // moment they are annotated and there is no way to revise your own work.
+  function addLiveRows(list) {
+    if (!feed) return;
+    const added = [];
+
+    for (const el2 of document.querySelectorAll("[data-plainspeak]")) {
+      const id = el2.getAttribute("data-plainspeak");
+      const ann = ((feed.annotations || []).filter((a) => a && a.id === id))[0];
+      if (!ann || typeof ann.headline !== "string") continue;
+
+      added.push(buildRow({
+        el: el2,
+        text: ann.headline,
+        key: M.key(ann.headline),
+        tag: el2.tagName.toLowerCase(),
+        href: ann.source && /^https?:/.test(ann.source) ? ann.source : null,
+        kind: "headline"
+      }, ann));
+    }
+
+    // Top of the list: revising something already published is the more urgent
+    // task than starting a new one.
+    for (let i = added.length - 1; i >= 0; i--) list.insertBefore(added[i].node, list.firstChild);
+    rows = added.concat(rows);
+  }
+
   function applyFilter() {
     const isFeed = view === "feed";
     const listBox = document.getElementById("ps-ed-list");
@@ -204,20 +267,29 @@
 
     let shown = 0;
     for (const r of rows) {
-      const changed = r.node.classList.contains("ps-ed-changed");
-      // An edited row stays visible in every view: switching filters must never
-      // hide work already started.
-      const show = view === "all" ? true
-                 : view === "edited" ? changed
-                 : r.cand.kind === "headline" || changed;
+      const dirty = r.node.classList.contains("ps-ed-dirty");
+      // A row edited this session stays visible in every view: switching views
+      // must never hide work already started. A typed query is authoritative
+      // though -- when you are searching you want only what you searched for.
+      const inView = view === "all" ? true
+                   : view === "edited" ? dirty
+                   : r.cand.kind === "headline" || dirty;
+      const show = inView && matches(r.cand.text);
       r.node.hidden = !show;
       if (show) shown++;
+    }
+
+    let feedShown = 0;
+    for (const f of feedRows) {
+      const show = matches(f.ann.headline);
+      f.node.hidden = !show;
+      if (show) feedShown++;
     }
 
     const counts = {
       headline: rows.filter((r) => r.cand.kind === "headline").length,
       all: rows.length,
-      edited: rows.filter((r) => r.node.classList.contains("ps-ed-changed")).length,
+      edited: rows.filter((r) => r.node.classList.contains("ps-ed-dirty")).length,
       feed: feed ? (feed.annotations || []).length : 0
     };
     for (const t of tabs) {
@@ -225,8 +297,20 @@
       t.btn.classList.toggle("ps-ed-on", view === t.view);
     }
 
+    const sub = document.getElementById("ps-ed-sub");
+    if (sub) {
+      sub.textContent = query.trim()
+        ? (isFeed ? feedShown : shown) + " matching “" + query.trim() + "”"
+        : rows.filter((r) => r.cand.kind === "headline").length + " of " + rows.length + " matchable";
+    }
+
     const empty = document.getElementById("ps-ed-empty");
-    if (empty) empty.hidden = shown > 0 || !rows.length;
+    if (empty) {
+      empty.hidden = isFeed || shown > 0 || !rows.length;
+      if (!empty.hidden && query.trim()) {
+        empty.textContent = "Nothing matches “" + query.trim() + "” in this view.";
+      }
+    }
   }
 
   // ----------------------------------------------------------------- feed view
@@ -282,6 +366,7 @@
     const box = document.getElementById("ps-ed-feed");
     if (!box) return;
     box.textContent = "";
+    feedRows.length = 0;
 
     if (!feed) {
       box.appendChild(el("div", "ps-ed-empty",
@@ -311,6 +396,7 @@
         row.appendChild(hint);
       }
       box.appendChild(row);
+      feedRows.push({ ann, node: row });
     }
 
     if (!anns.length) box.appendChild(el("div", "ps-ed-empty", "The feed is empty."));
@@ -329,7 +415,9 @@
     const bar = el("div", "ps-ed-bar");
     bar.appendChild(el("strong", null, "Plainspeak editor"));
     const heads = cands.filter((c) => c.kind === "headline").length;
-    bar.appendChild(el("span", "ps-ed-sub", heads + " of " + cands.length + " matchable"));
+    const sub = el("span", "ps-ed-sub", heads + " of " + cands.length + " matchable");
+    sub.id = "ps-ed-sub";
+    bar.appendChild(sub);
 
     tabs.length = 0;
     for (const [v, label] of [["headline", "headlines"], ["all", "all"],
@@ -345,8 +433,17 @@
     bar.appendChild(close);
     panel.appendChild(bar);
 
+    const filterRow = el("div", "ps-ed-filterbar");
+    const q = el("input", "ps-ed-q");
+    q.type = "search";
+    q.placeholder = "filter headlines…";
+    q.spellcheck = false;
+    q.addEventListener("input", () => { query = q.value; applyFilter(); });
+    filterRow.appendChild(q);
+    panel.appendChild(filterRow);
+
     const list = el("div", "ps-ed-list");
-    rows = cands.map(buildRow);
+    rows = cands.map((c) => buildRow(c));   // not cands.map(buildRow): the index would arrive as `ann`
     for (const r of rows) list.appendChild(r.node);
 
     const empty = el("div", "ps-ed-empty", !cands.length
@@ -367,8 +464,9 @@
 
     requestFeed((data) => {
       feed = data;
+      addLiveRows(list);
       renderFeed(cands);
-      applyFilter();
+      refreshAll();
     });
 
     const foot = el("div", "ps-ed-foot");
@@ -397,12 +495,15 @@
 
     document.body.appendChild(panel);
     refreshAll();
+    q.focus();
   }
 
   function shut() {
     const p = document.getElementById(ID);
     if (p) p.remove();
     rows = [];
+    feedRows.length = 0;
+    query = "";
   }
 
   document.addEventListener("keydown", (e) => {
@@ -411,6 +512,18 @@
       document.getElementById(ID) ? shut() : open();
       return;
     }
-    if (e.key === "Escape" && document.getElementById(ID)) shut();
+    if (e.key === "Escape" && document.getElementById(ID)) {
+      // Escape clears a live search before it closes the panel, so a typo does
+      // not cost you the rows you have already edited.
+      const q = document.querySelector("#" + ID + " .ps-ed-q");
+      if (query.trim() && q) {
+        q.value = "";
+        query = "";
+        applyFilter();
+        q.focus();
+        return;
+      }
+      shut();
+    }
   });
 })();

@@ -55,10 +55,36 @@
 .ps-ed-primary { background: #c0261f; border-color: #c0261f; color: #fff; }
 .ps-ed-primary:hover { background: #a81f19; }
 
+.ps-ed-filterbar {
+  padding: 7px 12px;
+  background: #fff;
+  border-bottom: 1px solid #e4e0d8;
+}
+
+.ps-ed-q {
+  font: inherit;
+  font-size: 12px;
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid #ddd8ce;
+  border-radius: 3px;
+  background: #fbfbf9;
+  color: #1a1a1a;
+}
+.ps-ed-q:focus {
+  outline: none;
+  border-color: #c0261f;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(192, 38, 31, 0.12);
+}
+.ps-ed-q::placeholder { color: #a5a5a5; }
+
 .ps-ed-list { flex: 1; overflow-y: auto; padding: 4px 0; }
 
 .ps-ed-row { padding: 9px 12px; border-bottom: 1px solid #eeebe4; }
 .ps-ed-row.ps-ed-changed { background: #fff8f7; }
+/* Changed this session, as opposed to merely carrying an annotation already. */
+.ps-ed-row.ps-ed-dirty { box-shadow: inset 3px 0 0 #c0261f; }
 
 .ps-ed-head { display: flex; align-items: baseline; gap: 6px; }
 
@@ -73,6 +99,15 @@
 /* Text that resolves to a dated article URL, i.e. a real story card. */
 .ps-ed-tag.ps-ed-story { color: #c0261f; cursor: help; }
 .ps-ed-tag.ps-ed-story::after { content: " \2197"; }
+
+/* Already live in annotations.json. The box opens on its current rewrite. */
+.ps-ed-tag.ps-ed-live {
+  color: #fff;
+  background: #2e7d4f;
+  padding: 1px 5px;
+  border-radius: 2px;
+  cursor: help;
+}
 
 .ps-ed-orig {
   font-size: 11px;

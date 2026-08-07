@@ -61,16 +61,36 @@
       "note": "'tell' has the flavor of actually describing a real event. The story, however, cites claims by the activists, but no independently verified or verifiable evidence other than what was said by activists whose mission was to call attention to their cause'",
       "expires": "2026-08-09T00:00:00Z"
     },
-    {
-      "id": "2026-08-07-e",
-      "headline": "Cassidy Will Back Blanche, Salvaging His Confirmation",
-      "ops": [
-        { "t": "insert", "at": 7, "text": ", Future Lobbyist," }
-      ],
-      "source": "https://example.com",
-      "note": "One sentence on why this framing is a euphemism.",
-      "expires": "2026-08-09T00:00:00Z"
-    },
+  {
+    "id": "2026-08-07-e",
+    "headline": "Cassidy Will Back Blanche, Salvaging His Confirmation",
+    "ops": [
+      {
+        "t": "strike",
+        "start": 0,
+        "len": 8
+      },
+      {
+        "t": "insert",
+        "at": 8,
+        "text": "Having Destroyed Medicine, Cassidy, Future Lobbyist, "
+      },
+      {
+        "t": "strike",
+        "start": 27,
+        "len": 26
+      },
+      {
+        "t": "insert",
+        "at": 53,
+        "text": "to Destroy Medicine"
+      }
+    ],
+    "source": "https://example.com",
+    "note": "One sentence on why this framing is a euphemism.",
+    "expires": "2026-08-09T00:00:00Z"
+  }
+,
     {
       "id": "2026-08-07-f",
       "headline": "Trump Vowed to Thwart Iran's Nuclear Program. Here's Where That Stands.",
