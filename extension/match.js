@@ -41,7 +41,7 @@
 
   // Our own UI is full of headline-shaped text. Without this the matcher would
   // annotate the editor's own rows, and the editor would offer them as candidates.
-  const OURS = "#ps-editor, #ps-badge";
+  const OURS = "#ps-editor, #ps-badge, #ps-list";
 
   // NYT article URLs carry a date path: /2026/08/07/us/politics/....
   const ARTICLE_HREF = /\/\d{4}\/\d{2}\/\d{2}\//;

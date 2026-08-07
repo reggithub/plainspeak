@@ -143,6 +143,8 @@
     if (!b) {
       b = document.createElement("div");
       b.id = "ps-badge";
+      b.title = "Click to list the annotated headlines";
+      b.addEventListener("click", toggleList);
       document.body.appendChild(b);
     }
     const msg =
@@ -154,8 +156,87 @@
     // Write only on change. An unconditional write mutates the DOM, which wakes
     // the MutationObserver, which schedules another run, which writes again --
     // a 350ms loop that never settles.
-    if (b.textContent !== msg) b.textContent = msg;
+    if (b.textContent !== msg) {
+      b.textContent = msg;
+      b.classList.toggle("ps-has", count > 0);
+      // An open list is now stale. Rebuilding here is safe only because this
+      // branch is gated on the count actually changing.
+      if (document.getElementById("ps-list")) buildList();
+    }
   }
+
+  // ------------------------------------------------------------- headline list
+  //
+  // The badge is the only always-visible piece of Plainspeak on the page, so it
+  // doubles as the way in: click it for what was annotated, click an entry to go
+  // there. Entries read as the annotation reads -- past the strikes -- because
+  // that is the sentence the annotation is arguing for.
+
+  function annById(id) {
+    for (const a of (feed && feed.annotations) || []) if (a && a.id === id) return a;
+    return null;
+  }
+
+  function goTo(el) {
+    el.scrollIntoView({ block: "center", behavior: "smooth" });
+    el.classList.add("ps-target");
+    setTimeout(() => el.classList.remove("ps-target"), 1500);
+  }
+
+  function buildList() {
+    const old = document.getElementById("ps-list");
+    if (old) old.remove();
+
+    const marked = [...document.querySelectorAll("[" + DONE_ATTR + "]")];
+    const panel = document.createElement("div");
+    panel.id = "ps-list";
+
+    const head = document.createElement("div");
+    head.className = "ps-list-head";
+    head.textContent = marked.length
+      ? marked.length + (marked.length === 1 ? " annotated headline" : " annotated headlines")
+      : "Nothing annotated on this page";
+    panel.appendChild(head);
+
+    for (const el of marked) {
+      const ann = annById(el.getAttribute(DONE_ATTR));
+      const row = document.createElement("button");
+      row.className = "ps-list-row";
+      row.type = "button";
+
+      // readThrough gives the rewritten sentence; fall back to the live text if
+      // the feed entry has gone (id renamed, annotation removed mid-session).
+      let label;
+      try {
+        label = ann ? PS_DIFF.readThrough(ann.headline, ann.ops || []) : el.textContent;
+      } catch {
+        label = el.textContent;
+      }
+      row.textContent = label;
+
+      row.addEventListener("click", (e) => { e.stopPropagation(); goTo(el); });
+      panel.appendChild(row);
+    }
+
+    document.body.appendChild(panel);
+  }
+
+  function closeList() {
+    const p = document.getElementById("ps-list");
+    if (p) p.remove();
+  }
+
+  function toggleList(e) {
+    if (e) e.stopPropagation();
+    if (document.getElementById("ps-list")) closeList();
+    else buildList();
+  }
+
+  // Click anywhere else, or Escape, dismisses it.
+  document.addEventListener("click", (e) => {
+    const p = document.getElementById("ps-list");
+    if (p && !p.contains(e.target) && e.target.id !== "ps-badge") closeList();
+  });
 
   // ----------------------------------------------------------------- main run
 
@@ -212,6 +293,9 @@
   document.addEventListener("keydown", (e) => {
     if (e.altKey && (e.key === "p" || e.key === "P")) {
       document.documentElement.classList.toggle("ps-off");
+      closeList();
+      return;
     }
+    if (e.key === "Escape") closeList();
   });
 })();
