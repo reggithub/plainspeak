@@ -146,6 +146,25 @@
       "source": "https://www.nytimes.com/live/2026/08/07/us/trump-news",
       "note": "",
       "expires": "2026-08-09T00:00:00Z"
+    },
+    {
+      "id": "2026-08-07-j",
+      "headline": "'I Was So Wrong': Iranians Say Trump's Promises Never Came True",
+      "ops": [
+        {
+          "t": "strike",
+          "start": 27,
+          "len": 36
+        },
+        {
+          "t": "insert",
+          "at": 63,
+          "text": "Learn Not to Believe Anything Trump Says"
+        }
+      ],
+      "source": "https://www.nytimes.com/2026/08/07/us/politics/trump-iran-war-protesters.html",
+      "note": "",
+      "expires": "2026-08-09T00:00:00Z"
     }
   ]
 }
