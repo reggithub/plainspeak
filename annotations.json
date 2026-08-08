@@ -242,6 +242,35 @@
       "source": "https://www.nytimes.com/2026/08/07/us/politics/todd-blanche-ag-murkowski.html",
       "note": "",
       "expires": "2026-08-10T00:00:00Z"
+    },
+    {
+      "id": "2026-08-08-d",
+      "headline": "In Confirming Blanche, Senators Endorse a Justice Dept. Under Trump's Sway",
+      "ops": [
+        {
+          "t": "strike",
+          "start": 0,
+          "len": 14
+        },
+        {
+          "t": "insert",
+          "at": 14,
+          "text": "Afraid of Trump, Semators Confirm "
+        },
+        {
+          "t": "strike",
+          "start": 23,
+          "len": 51
+        },
+        {
+          "t": "insert",
+          "at": 74,
+          "text": "Giving Trump Even More Power to Hurt Them"
+        }
+      ],
+      "source": "https://www.nytimes.com/2026/08/08/us/politics/blanche-attorney-general-doj-trump-power.html",
+      "note": "",
+      "expires": "2026-08-10T00:00:00Z"
     }
   ]
 }
