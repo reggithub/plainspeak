@@ -159,12 +159,60 @@
         {
           "t": "insert",
           "at": 63,
-          "text": "Learn Not to Believe Anything Trump Says"
+          "text": "Realize They've Been Betrayed by Trump"
         }
       ],
       "source": "https://www.nytimes.com/2026/08/07/us/politics/trump-iran-war-protesters.html",
       "note": "",
       "expires": "2026-08-09T00:00:00Z"
+    },
+    {
+      "id": "2026-08-08-a",
+      "headline": "Trump Revives Battle to Fire Sitting Fed Governor",
+      "ops": [
+        {
+          "t": "strike",
+          "start": 6,
+          "len": 15
+        },
+        {
+          "t": "insert",
+          "at": 21,
+          "text": "Tres "
+        },
+        {
+          "t": "insert",
+          "at": 49,
+          "text": " Again"
+        }
+      ],
+      "source": "https://www.nytimes.com/2026/08/07/business/trump-lisa-cook-fed.html",
+      "note": "",
+      "expires": "2026-08-10T00:00:00Z"
+    },
+    {
+      "id": "2026-08-08-b",
+      "headline": "Justin Trudeau, Katy Perry and the Look of the Celebrity Statesman",
+      "ops": [
+        {
+          "t": "insert",
+          "at": 0,
+          "text": "In the 1980s Sociologist Neil Postman Warned About Fusing Showbusiness and Politics: "
+        },
+        {
+          "t": "strike",
+          "start": 57,
+          "len": 9
+        },
+        {
+          "t": "insert",
+          "at": 66,
+          "text": "Politician Now"
+        }
+      ],
+      "source": "https://www.nytimes.com/2026/08/07/style/justin-trudeau-katy-perry-style.html",
+      "note": "",
+      "expires": "2026-08-10T00:00:00Z"
     }
   ]
 }
