@@ -220,6 +220,16 @@
       "ops": [
         {
           "t": "strike",
+          "start": 24,
+          "len": 17
+        },
+        {
+          "t": "insert",
+          "at": 41,
+          "text": "Trump's Roy Cohn "
+        },
+        {
+          "t": "strike",
           "start": 65,
           "len": 8
         },
