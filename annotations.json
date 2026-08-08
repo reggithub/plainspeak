@@ -213,6 +213,25 @@
       "source": "https://www.nytimes.com/2026/08/07/style/justin-trudeau-katy-perry-style.html",
       "note": "",
       "expires": "2026-08-10T00:00:00Z"
+    },
+    {
+      "id": "2026-08-08-c",
+      "headline": "Blanche Is Confirmed as Attorney General After Overcoming G.O.P. Concerns",
+      "ops": [
+        {
+          "t": "strike",
+          "start": 65,
+          "len": 8
+        },
+        {
+          "t": "insert",
+          "at": 73,
+          "text": "Senators by Threating Their Careers (or Worse)."
+        }
+      ],
+      "source": "https://www.nytimes.com/2026/08/07/us/politics/todd-blanche-ag-murkowski.html",
+      "note": "",
+      "expires": "2026-08-10T00:00:00Z"
     }
   ]
 }
