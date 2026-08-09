@@ -5,11 +5,7 @@
       "id": "2026-08-07-g",
       "headline": "Meta Ordered to Pay $567 Million in New Mexico Child Safety Case",
       "ops": [
-        {
-          "t": "insert",
-          "at": 33,
-          "text": "(Less than 1% of Its Profits) "
-        }
+        { "t": "insert", "at": 33, "text": "(Less than 1% of Its Profits) " }
       ],
       "source": "https://example.com",
       "note": "",
@@ -19,16 +15,8 @@
       "id": "2026-08-07-a",
       "headline": "Trump Again Targets Birthright Citizenship, in Two Executive Orders",
       "ops": [
-        {
-          "t": "strike",
-          "start": 12,
-          "len": 8
-        },
-        {
-          "t": "insert",
-          "at": 20,
-          "text": "Tries to Kill Constitutionally-protected "
-        }
+        { "t": "strike", "start": 12, "len": 8 },
+        { "t": "insert", "at": 20, "text": "Tries to Kill Constitutionally-protected " }
       ],
       "source": "https://example.com",
       "note": "One sentence on why this framing is a euphemism.",
@@ -38,11 +26,7 @@
       "id": "2026-08-07-b",
       "headline": "Blanche's Nomination for Attorney General",
       "ops": [
-        {
-          "t": "insert",
-          "at": 0,
-          "text": "Trump's Sometimes Personal Lawyer Todd "
-        }
+        { "t": "insert", "at": 0, "text": "Trump's Sometimes Personal Lawyer Todd " }
       ],
       "source": "https://example.com",
       "note": "One sentence on why this framing is a euphemism.",
@@ -52,11 +36,7 @@
       "id": "2026-08-07-c",
       "headline": "Republicans Cannot Possibly Let This Congressman Go",
       "ops": [
-        {
-          "t": "insert",
-          "at": 51,
-          "text": "? Look at How They Handled Trump"
-        }
+        { "t": "insert", "at": 51, "text": "? Look at How They Handled Trump" }
       ],
       "source": "https://example.com",
       "note": "One sentence on why this framing is a euphemism.",
@@ -66,16 +46,8 @@
       "id": "2026-08-07-d",
       "headline": "Activists Tell of Abuse in Israeli Custody",
       "ops": [
-        {
-          "t": "strike",
-          "start": 10,
-          "len": 8
-        },
-        {
-          "t": "insert",
-          "at": 18,
-          "text": "Claim "
-        }
+        { "t": "strike", "start": 10, "len": 8 },
+        { "t": "insert", "at": 18, "text": "Claim " }
       ],
       "source": "https://example.com",
       "note": "'tell' has the flavor of actually describing a real event. The story, however, cites claims by the activists, but no independently verified or verifiable evidence other than what was said by activists whose mission was to call attention to their cause'",
@@ -85,21 +57,9 @@
       "id": "2026-08-07-e",
       "headline": "Cassidy Will Back Blanche, Salvaging His Confirmation",
       "ops": [
-        {
-          "t": "insert",
-          "at": 7,
-          "text": ", Having Destroyed Medicine,"
-        },
-        {
-          "t": "strike",
-          "start": 27,
-          "len": 26
-        },
-        {
-          "t": "insert",
-          "at": 53,
-          "text": "to Destroy Law"
-        }
+        { "t": "insert", "at": 7, "text": ", Having Destroyed Medicine," },
+        { "t": "strike", "start": 27, "len": 26 },
+        { "t": "insert", "at": 53, "text": "to Destroy Law" }
       ],
       "source": "https://example.com",
       "note": "One sentence on why this framing is a euphemism.",
@@ -109,11 +69,7 @@
       "id": "2026-08-07-f",
       "headline": "Trump Vowed to Thwart Iran's Nuclear Program. Here's Where That Stands.",
       "ops": [
-        {
-          "t": "insert",
-          "at": 71,
-          "text": " (He Makes Lots of Vows)"
-        }
+        { "t": "insert", "at": 71, "text": " (He Makes Lots of Vows)" }
       ],
       "source": "https://example.com",
       "note": "",
@@ -123,11 +79,7 @@
       "id": "2026-08-07-i",
       "headline": "Trump Restarts Battle to Fire Sitting Fed Governor",
       "ops": [
-        {
-          "t": "insert",
-          "at": 0,
-          "text": "Abusing the Infinite Legal Resources of the DOJ, "
-        }
+        { "t": "insert", "at": 0, "text": "Abusing the Infinite Legal Resources of the DOJ, " }
       ],
       "source": "https://www.nytimes.com/2026/08/07/business/trump-lisa-cook-fed.html",
       "note": "",
@@ -137,11 +89,7 @@
       "id": "2026-08-07-h",
       "headline": "Appeals Panel Blocks Ballroom Project, Setting Up Likely Supreme Court Fight",
       "ops": [
-        {
-          "t": "insert",
-          "at": 76,
-          "text": " as Usual Because It Doesn't Cost Trump Anything"
-        }
+        { "t": "insert", "at": 76, "text": " as Usual Because It Doesn't Cost Trump Anything" }
       ],
       "source": "https://www.nytimes.com/live/2026/08/07/us/trump-news",
       "note": "",
@@ -151,16 +99,8 @@
       "id": "2026-08-07-j",
       "headline": "'I Was So Wrong': Iranians Say Trump's Promises Never Came True",
       "ops": [
-        {
-          "t": "strike",
-          "start": 27,
-          "len": 36
-        },
-        {
-          "t": "insert",
-          "at": 63,
-          "text": "Realize They've Been Betrayed by Trump"
-        }
+        { "t": "strike", "start": 27, "len": 36 },
+        { "t": "insert", "at": 63, "text": "Realize They've Been Betrayed by Trump" }
       ],
       "source": "https://www.nytimes.com/2026/08/07/us/politics/trump-iran-war-protesters.html",
       "note": "",
@@ -170,21 +110,9 @@
       "id": "2026-08-08-a",
       "headline": "Trump Revives Battle to Fire Sitting Fed Governor",
       "ops": [
-        {
-          "t": "strike",
-          "start": 6,
-          "len": 15
-        },
-        {
-          "t": "insert",
-          "at": 21,
-          "text": "Tres "
-        },
-        {
-          "t": "insert",
-          "at": 49,
-          "text": " Again"
-        }
+        { "t": "strike", "start": 6, "len": 15 },
+        { "t": "insert", "at": 21, "text": "Tres " },
+        { "t": "insert", "at": 49, "text": " Again" }
       ],
       "source": "https://www.nytimes.com/2026/08/07/business/trump-lisa-cook-fed.html",
       "note": "",
@@ -194,21 +122,9 @@
       "id": "2026-08-08-b",
       "headline": "Justin Trudeau, Katy Perry and the Look of the Celebrity Statesman",
       "ops": [
-        {
-          "t": "insert",
-          "at": 0,
-          "text": "In the 1980s Sociologist Neil Postman Warned About Fusing Showbusiness and Politics: "
-        },
-        {
-          "t": "strike",
-          "start": 57,
-          "len": 9
-        },
-        {
-          "t": "insert",
-          "at": 66,
-          "text": "Politician Now"
-        }
+        { "t": "insert", "at": 0, "text": "In the 1980s Sociologist Neil Postman Warned About Fusing Showbusiness and Politics: " },
+        { "t": "strike", "start": 57, "len": 9 },
+        { "t": "insert", "at": 66, "text": "Politician Now" }
       ],
       "source": "https://www.nytimes.com/2026/08/07/style/justin-trudeau-katy-perry-style.html",
       "note": "",
@@ -218,26 +134,10 @@
       "id": "2026-08-08-c",
       "headline": "Blanche Is Confirmed as Attorney General After Overcoming G.O.P. Concerns",
       "ops": [
-        {
-          "t": "strike",
-          "start": 24,
-          "len": 17
-        },
-        {
-          "t": "insert",
-          "at": 41,
-          "text": "Trump's Roy Cohn "
-        },
-        {
-          "t": "strike",
-          "start": 65,
-          "len": 8
-        },
-        {
-          "t": "insert",
-          "at": 73,
-          "text": "Senators' Feelings of Shame"
-        }
+        { "t": "strike", "start": 24, "len": 17 },
+        { "t": "insert", "at": 41, "text": "Trump's Roy Cohn " },
+        { "t": "strike", "start": 65, "len": 8 },
+        { "t": "insert", "at": 73, "text": "Senators' Feelings of Shame" }
       ],
       "source": "https://www.nytimes.com/2026/08/07/us/politics/todd-blanche-ag-murkowski.html",
       "note": "",
@@ -247,26 +147,10 @@
       "id": "2026-08-08-d",
       "headline": "In Confirming Blanche, Senators Endorse a Justice Dept. Under Trump's Sway",
       "ops": [
-        {
-          "t": "strike",
-          "start": 0,
-          "len": 14
-        },
-        {
-          "t": "insert",
-          "at": 14,
-          "text": "Afraid of Trump, Semators Confirm "
-        },
-        {
-          "t": "strike",
-          "start": 23,
-          "len": 51
-        },
-        {
-          "t": "insert",
-          "at": 74,
-          "text": "Giving Trump Even More Power to Hurt Them"
-        }
+        { "t": "strike", "start": 0, "len": 14 },
+        { "t": "insert", "at": 14, "text": "Afraid of Trump, Semators Confirm " },
+        { "t": "strike", "start": 23, "len": 51 },
+        { "t": "insert", "at": 74, "text": "Giving Trump Even More Power to Hurt Them" }
       ],
       "source": "https://www.nytimes.com/2026/08/08/us/politics/blanche-attorney-general-doj-trump-power.html",
       "note": "",
@@ -276,28 +160,23 @@
       "id": "2026-08-09-a",
       "headline": "Senate Bows to Reality, Leaving Trump's Voting Bill Undone",
       "ops": [
-        {
-          "t": "strike",
-          "start": 7,
-          "len": 5
-        },
-        {
-          "t": "insert",
-          "at": 12,
-          "text": "Can't Pass SAVE Act That Trumps Needs "
-        },
-        {
-          "t": "strike",
-          "start": 15,
-          "len": 43
-        },
-        {
-          "t": "insert",
-          "at": 58,
-          "text": "Save Himself from Post-Midterm Investigations"
-        }
+        { "t": "strike", "start": 7, "len": 5 },
+        { "t": "insert", "at": 12, "text": "Can't Pass SAVE Act That Trumps Needs " },
+        { "t": "strike", "start": 15, "len": 43 },
+        { "t": "insert", "at": 58, "text": "Save Himself from Post-Midterm Investigations" }
       ],
       "source": "https://www.nytimes.com/2026/08/08/us/politics/senate-bows-to-reality-leaving-trumps-voting-bill-undone.html",
+      "note": "",
+      "expires": "2026-08-11T00:00:00Z"
+    },
+    {
+      "id": "2026-08-09-b",
+      "headline": "Oil Prices Climb and Stocks Dip on Stalemate in Iran War",
+      "ops": [
+        { "t": "strike", "start": 35, "len": 10 },
+        { "t": "insert", "at": 45, "text": "Trump's Chaotic Gyrations " }
+      ],
+      "source": "https://www.nytimes.com/2026/08/09/business/oil-stocks-iran-war.html",
       "note": "",
       "expires": "2026-08-11T00:00:00Z"
     }
