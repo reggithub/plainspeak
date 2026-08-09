@@ -171,12 +171,11 @@
     },
     {
       "id": "2026-08-09-b",
-      "headline": "Oil Prices Climb and Stocks Dip on Stalemate in Iran War",
+      "headline": "Iran Elevates Longtime Military Commander to Top Security Post",
       "ops": [
-        { "t": "strike", "start": 35, "len": 10 },
-        { "t": "insert", "at": 45, "text": "Trump's Chaotic Gyrations " }
+        { "t": "insert", "at": 62, "text": ". His Predecessors Didn't Live long." }
       ],
-      "source": "https://www.nytimes.com/2026/08/09/business/oil-stocks-iran-war.html",
+      "source": "https://www.nytimes.com/2026/08/09/world/middleeast/iran-security-council-guards-commander.html",
       "note": "",
       "expires": "2026-08-11T00:00:00Z"
     }
