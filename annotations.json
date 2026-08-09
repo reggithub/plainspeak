@@ -178,6 +178,18 @@
       "source": "https://www.nytimes.com/2026/08/09/world/middleeast/iran-security-council-guards-commander.html",
       "note": "",
       "expires": "2026-08-11T00:00:00Z"
+    },
+    {
+      "id": "2026-08-09-c",
+      "headline": "She Has One Job: Making the Impossible Happen for Her Ultrarich Clients",
+      "ops": [
+        { "t": "insert", "at": 0, "text": "Professional Line Cutter, " },
+        { "t": "strike", "start": 54, "len": 10 },
+        { "t": "insert", "at": 64, "text": "Ultraentitled " }
+      ],
+      "source": "https://www.nytimes.com/2026/08/09/style/olivia-ferney-top-tier-travel.html",
+      "note": "",
+      "expires": "2026-08-11T00:00:00Z"
     }
   ]
 }
