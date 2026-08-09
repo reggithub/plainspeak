@@ -183,7 +183,8 @@
       "id": "2026-08-09-c",
       "headline": "Kalshi's C.E.O. Isn't Interested in Management Advice",
       "ops": [
-        { "t": "insert", "at": 0, "text": "Money Launderer " }
+        { "t": "strike", "start": 0, "len": 9 },
+        { "t": "insert", "at": 9, "text": "Money Laundering " }
       ],
       "source": "https://www.nytimes.com/2026/08/09/business/kalshi-tarek-mansour-prediction-markets.html",
       "note": "",
