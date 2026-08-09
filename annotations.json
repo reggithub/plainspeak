@@ -277,29 +277,24 @@
       "headline": "Senate Bows to Reality, Leaving Trump's Voting Bill Undone",
       "ops": [
         {
-          "t": "insert",
-          "at": 0,
-          "text": "Republican "
-        },
-        {
           "t": "strike",
-          "start": 24,
-          "len": 23
+          "start": 7,
+          "len": 5
         },
         {
           "t": "insert",
-          "at": 47,
-          "text": "Can't Pass the Voter Suppression "
+          "at": 12,
+          "text": "Can't Pass SAVE Act That Trumps Needs "
         },
         {
           "t": "strike",
-          "start": 52,
-          "len": 6
+          "start": 15,
+          "len": 43
         },
         {
           "t": "insert",
           "at": 58,
-          "text": "That Trump Needs to Evade Investigation by Democrats After the Midterms"
+          "text": "Save Himself from Post-Midterm Investigations"
         }
       ],
       "source": "https://www.nytimes.com/2026/08/08/us/politics/senate-bows-to-reality-leaving-trumps-voting-bill-undone.html",
