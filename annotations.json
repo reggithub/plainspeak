@@ -271,6 +271,40 @@
       "source": "https://www.nytimes.com/2026/08/08/us/politics/blanche-attorney-general-doj-trump-power.html",
       "note": "",
       "expires": "2026-08-10T00:00:00Z"
+    },
+    {
+      "id": "2026-08-09-a",
+      "headline": "Senate Bows to Reality, Leaving Trump's Voting Bill Undone",
+      "ops": [
+        {
+          "t": "insert",
+          "at": 0,
+          "text": "Republican "
+        },
+        {
+          "t": "strike",
+          "start": 24,
+          "len": 23
+        },
+        {
+          "t": "insert",
+          "at": 47,
+          "text": "Can't Pass the Voter Suppression "
+        },
+        {
+          "t": "strike",
+          "start": 52,
+          "len": 6
+        },
+        {
+          "t": "insert",
+          "at": 58,
+          "text": "That Trump Needs to Evade Investigation by Democrats After the Midterms"
+        }
+      ],
+      "source": "https://www.nytimes.com/2026/08/08/us/politics/senate-bows-to-reality-leaving-trumps-voting-bill-undone.html",
+      "note": "",
+      "expires": "2026-08-11T00:00:00Z"
     }
   ]
 }
