@@ -218,7 +218,6 @@
         { "t": "strike", "start": 0, "len": 5 },
         { "t": "strike", "start": 26, "len": 12 },
         { "t": "insert", "at": 38, "text": "Served as Decoys for " },
-        { "t": "insert", "at": 61, "text": "Here are " },
         { "t": "strike", "start": 72, "len": 4 },
         { "t": "insert", "at": 76, "text": "He Chose to Survive" }
       ],
