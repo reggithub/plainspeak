@@ -200,6 +200,97 @@
       "source": "https://www.nytimes.com/2026/08/10/us/politics/trump-new-strategy-middle-east.html",
       "note": "",
       "expires": "2026-08-13T00:00:00Z"
+    },
+    {
+      "id": "2026-08-13-a",
+      "headline": "ICE Plans to Give Officers Gloves That Can Deliver Electric Shocks",
+      "ops": [
+        { "t": "insert", "at": 66, "text": " Unconcerned About Their Potential Lethality" }
+      ],
+      "source": "https://www.nytimes.com/2026/08/12/us/politics/ice-gloves-shock.html",
+      "note": "",
+      "expires": "2026-08-15T00:00:00Z"
+    },
+    {
+      "id": "2026-08-13-b",
+      "headline": "Even Some Cabinet Members Didn't Join Trump's Secret Flight. Here's Who Did.",
+      "ops": [
+        { "t": "strike", "start": 0, "len": 5 },
+        { "t": "strike", "start": 26, "len": 12 },
+        { "t": "insert", "at": 38, "text": "Served as Decoys for " },
+        { "t": "insert", "at": 61, "text": "Here are " },
+        { "t": "strike", "start": 72, "len": 4 },
+        { "t": "insert", "at": 76, "text": "He Chose to Survive" }
+      ],
+      "source": "https://www.nytimes.com/2026/08/12/us/politics/trump-air-force-one-secret-flight-passengers.html",
+      "note": "",
+      "expires": "2026-08-15T00:00:00Z"
+    },
+    {
+      "id": "2026-08-13-c",
+      "headline": "Suit Challenges Plan to Sell Early Access to Trump's Truth Social Posts",
+      "ops": [
+        { "t": "insert", "at": 16, "text": "Trump's Insider Trading as a Service " },
+        { "t": "strike", "start": 45, "len": 8 },
+        { "t": "insert", "at": 53, "text": "His " }
+      ],
+      "source": "https://www.nytimes.com/2026/08/12/us/politics/trump-truth-social-lawsuit.html",
+      "note": "",
+      "expires": "2026-08-15T00:00:00Z"
+    },
+    {
+      "id": "2026-08-13-d",
+      "headline": "For Trump, Secret Flight Was a Stunning Ruse. For Putin, 'a Regular Tuesday.'",
+      "ops": [
+        { "t": "strike", "start": 40, "len": 37 },
+        { "t": "insert", "at": 77, "text": "Ruse He Learned from Putin" }
+      ],
+      "source": "https://www.nytimes.com/2026/08/12/world/europe/trump-flight-putin-security.html",
+      "note": "",
+      "expires": "2026-08-15T00:00:00Z"
+    },
+    {
+      "id": "2026-08-13-e",
+      "headline": "A Fight Over Abortion and Surrogacy Ends With a Baby Born in Texas",
+      "ops": [
+        { "t": "strike", "start": 46, "len": 20 },
+        { "t": "insert", "at": 66, "text": "Defective Product that Cannot Be Returned" }
+      ],
+      "source": "https://www.nytimes.com/2026/08/12/us/texas-surrogate-baby-abortion-dispute.html",
+      "note": "",
+      "expires": "2026-08-15T00:00:00Z"
+    },
+    {
+      "id": "2026-08-13-f",
+      "headline": "Lakers Are Said to Be Sold to Bob Iger and Joshua Kushner for $12 Billion",
+      "ops": [
+        { "t": "strike", "start": 62, "len": 11 },
+        { "t": "insert", "at": 73, "text": "Epstein-Class Pocket Change" }
+      ],
+      "source": "https://www.nytimes.com/athletic/7508177/2026/08/12/los-angeles-lakers-sale-mark-walter-bob-iger-joshua-kushner/",
+      "note": "",
+      "expires": "2026-08-15T00:00:00Z"
+    },
+    {
+      "id": "2026-08-13-g",
+      "headline": "With Big Choices Ahead, Ocasio-Cortez Navigates New Territory",
+      "ops": [
+        { "t": "strike", "start": 38, "len": 23 },
+        { "t": "insert", "at": 61, "text": "Shares Too Much Information" }
+      ],
+      "source": "https://www.nytimes.com/2026/08/12/us/politics/with-big-choices-ahead-ocasio-cortez-navigates-new-territory.html",
+      "note": "",
+      "expires": "2026-08-15T00:00:00Z"
+    },
+    {
+      "id": "2026-08-13-h",
+      "headline": "With Trump Secretly Evacuated, Imperiled Air Force One Became a Flying Decoy",
+      "ops": [
+        { "t": "insert", "at": 76, "text": " Complete with Potential Victims" }
+      ],
+      "source": "https://www.nytimes.com/2026/08/11/us/politics/trump-air-force-one-decoy.html",
+      "note": "",
+      "expires": "2026-08-15T00:00:00Z"
     }
   ]
 }
