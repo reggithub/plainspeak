@@ -300,6 +300,16 @@
       "source": "https://www.nytimes.com/2026/08/18/us/politics/trump-ballroom-construction.html",
       "note": "",
       "expires": "2026-08-20T00:00:00Z"
+    },
+    {
+      "id": "2026-08-18-b",
+      "headline": "Group Released Fake Polls in Some Races as a 'Social Experiment'",
+      "ops": [
+        { "t": "insert", "at": 53, "text": "Tuskegee " }
+      ],
+      "source": "https://www.nytimes.com/2026/08/18/polls/median-strategies-polls-bass-california-wisconsin.html",
+      "note": "",
+      "expires": "2026-08-20T00:00:00Z"
     }
   ]
 }
