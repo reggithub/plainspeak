@@ -290,6 +290,16 @@
       "source": "https://www.nytimes.com/2026/08/11/us/politics/trump-air-force-one-decoy.html",
       "note": "",
       "expires": "2026-08-15T00:00:00Z"
+    },
+    {
+      "id": "2026-08-18-a",
+      "headline": "White House Ballroom Rises at Breakneck Speed: 20 Hours a Day, 7 Days a Week",
+      "ops": [
+        { "t": "insert", "at": 76, "text": ". Trump Pursues His \"Bonwit Teller' Strategy of Putting Facts on the Ground" }
+      ],
+      "source": "https://www.nytimes.com/2026/08/18/us/politics/trump-ballroom-construction.html",
+      "note": "",
+      "expires": "2026-08-20T00:00:00Z"
     }
   ]
 }
