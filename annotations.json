@@ -310,6 +310,28 @@
       "source": "https://www.nytimes.com/2026/08/18/polls/median-strategies-polls-bass-california-wisconsin.html",
       "note": "",
       "expires": "2026-08-20T00:00:00Z"
+    },
+    {
+      "id": "2026-08-19-a",
+      "headline": "Deadly Israeli Strike on Gaza Cafe Raises Doubts About Progress on Peace Plan",
+      "ops": [
+        { "t": "strike", "start": 35, "len": 32 },
+        { "t": "insert", "at": 67, "text": "Advances " }
+      ],
+      "source": "https://www.nytimes.com/2026/08/18/world/middleeast/israeli-strike-gaza-cafe-peace-plan.html",
+      "note": "",
+      "expires": "2026-08-21T00:00:00Z"
+    },
+    {
+      "id": "2026-08-19-b",
+      "headline": "The New Physics of Power",
+      "ops": [
+        { "t": "strike", "start": 8, "len": 8 },
+        { "t": "insert", "at": 16, "text": "Economics " }
+      ],
+      "source": "https://www.nytimes.com/2026/08/18/opinion/us-israel-gaza-hezbollah-hamas-houthis.html",
+      "note": "",
+      "expires": "2026-08-21T00:00:00Z"
     }
   ]
 }
