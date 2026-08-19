@@ -343,6 +343,18 @@
       "source": "https://www.nytimes.com/2026/08/18/us/politics/south-carolina-senate-runoff-debate-graham-norman.html",
       "note": "",
       "expires": "2026-08-21T00:00:00Z"
+    },
+    {
+      "id": "2026-08-19-d",
+      "headline": "With Limited Options, Trump Tries Economic Pressure on Iran, Again",
+      "ops": [
+        { "t": "strike", "start": 0, "len": 22 },
+        { "t": "insert", "at": 22, "text": "Having Idiotically Screwed Up, " },
+        { "t": "insert", "at": 28, "text": "Insanely " }
+      ],
+      "source": "https://www.nytimes.com/2026/08/19/world/europe/iran-trump-economic-sanctions-leverage.html",
+      "note": "",
+      "expires": "2026-08-21T00:00:00Z"
     }
   ]
 }
