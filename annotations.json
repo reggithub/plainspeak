@@ -332,6 +332,17 @@
       "source": "https://www.nytimes.com/2026/08/18/opinion/us-israel-gaza-hezbollah-hamas-houthis.html",
       "note": "",
       "expires": "2026-08-21T00:00:00Z"
+    },
+    {
+      "id": "2026-08-19-c",
+      "headline": "'I'm Not That Informed on National Security,' Darline Graham Says in S. Carolina Debate",
+      "ops": [
+        { "t": "strike", "start": 9, "len": 37 },
+        { "t": "insert", "at": 46, "text": "Qualified to Be a Senator,' " }
+      ],
+      "source": "https://www.nytimes.com/2026/08/18/us/politics/south-carolina-senate-runoff-debate-graham-norman.html",
+      "note": "",
+      "expires": "2026-08-21T00:00:00Z"
     }
   ]
 }
