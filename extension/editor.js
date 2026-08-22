@@ -17,12 +17,13 @@
   const ID = "ps-editor";
 
   let rows = [];   // {cand, edited, source, note, el refs}
-  let view = "headline";   // headline | all | edited | feed
+  let view = "headline";   // headline | all | edited | misses | feed
   let feed = null;
   let query = "";
   let whole = true;   // emit the entire annotations.json, not just new entries
   const tabs = [];
   const feedRows = [];
+  const missRows = [];
 
   // Every whitespace-separated term must appear, so "cassidy blanche" finds the
   // headline with both regardless of order. Matched against the normalized form
@@ -351,12 +352,85 @@
     rows = added.concat(rows);
   }
 
+  // ----------------------------------------------------------- misses view
+  //
+  // "Why isn't that headline in the list?" answered for the whole page at once.
+  // Every story link the reader can see is checked for a headline the editor
+  // would offer; the ones with none are listed with the reason the closest
+  // element inside them was passed over.
+  //
+  // This is the view that found the four-hop limit in articleHref: the front
+  // page's biggest stories nest their headline six to ten levels below the <a>,
+  // the walk gave up, and a <p> with no link it could see could not be called a
+  // headline. They were all sitting here saying "no story link found from here".
+
+  function renderMisses(cands) {
+    const box = document.getElementById("ps-ed-misses");
+    if (!box) return;
+    box.textContent = "";
+    missRows.length = 0;
+
+    const all = M.coverage(cands);
+    const missing = all.filter((s) => !s.cand || s.cand.kind !== "headline");
+
+    const head = el("div", "ps-ed-sub",
+      (all.length - missing.length) + " of " + all.length +
+      " stories on this page have a headline the editor can offer");
+    box.appendChild(head);
+
+    for (const s of missing) {
+      const row = el("div", "ps-ed-frow");
+
+      const line = el("div", "ps-ed-head");
+      line.appendChild(el("span", "ps-ed-state ps-ed-missing", "unreachable"));
+      const url = el("span", "ps-ed-fid", s.href.replace(/^https?:\/\/[^/]+/, ""));
+      url.title = s.href;
+      line.appendChild(url);
+      row.appendChild(line);
+
+      // What the reader sees, so the story is recognisable even when nothing
+      // inside it qualified.
+      const seen = M.normalize(M.blockText(s.link)).slice(0, 120);
+      if (seen) row.appendChild(el("div", "ps-ed-fhead", seen));
+
+      // The candidate demoted by classify is the more useful answer when there
+      // is one -- it says the text was found and then judged, not missed.
+      if (s.cand) {
+        row.appendChild(el("div", "ps-ed-sub",
+          "found as <" + s.cand.tag + ">, not offered: " + (s.cand.why || "classified as text")));
+        const t = el("span", "ps-ed-orig", s.cand.text);
+        t.addEventListener("click", () => reveal(s.cand, true));
+        row.appendChild(t);
+      } else {
+        for (const n of M.nearMisses(s.link, { minWords: 2, skipAttr: "data-plainspeak" })) {
+          const why = el("div", "ps-ed-sub",
+            "<" + n.tag + "> " + (n.reason || "accepted, but no story link resolved to it"));
+          row.appendChild(why);
+          const t = el("span", "ps-ed-orig", n.text.slice(0, 120));
+          t.addEventListener("click", () => reveal({ el: n.el }, true));
+          row.appendChild(t);
+        }
+      }
+
+      box.appendChild(row);
+      missRows.push({ story: s, node: row });
+    }
+
+    if (!missing.length) {
+      box.appendChild(el("div", "ps-ed-empty",
+        "Every story link on this page has a headline in the list."));
+    }
+  }
+
   function applyFilter() {
     const isFeed = view === "feed";
+    const isMisses = view === "misses";
     const listBox = document.getElementById("ps-ed-list");
     const feedBox = document.getElementById("ps-ed-feed");
-    if (listBox) listBox.hidden = isFeed;
+    const missBox = document.getElementById("ps-ed-misses");
+    if (listBox) listBox.hidden = isFeed || isMisses;
     if (feedBox) feedBox.hidden = !isFeed;
+    if (missBox) missBox.hidden = !isMisses;
 
     let shown = 0;
     for (const r of rows) {
@@ -379,10 +453,18 @@
       if (show) feedShown++;
     }
 
+    let missShown = 0;
+    for (const m of missRows) {
+      const show = matches(M.blockText(m.story.link)) || matches(m.story.href);
+      m.node.hidden = !show;
+      if (show) missShown++;
+    }
+
     const counts = {
       headline: rows.filter((r) => r.cand.kind === "headline").length,
       all: rows.length,
       edited: rows.filter((r) => r.node.classList.contains("ps-ed-dirty")).length,
+      misses: missRows.length,
       feed: feed ? (feed.annotations || []).length : 0
     };
     for (const t of tabs) {
@@ -399,14 +481,15 @@
 
     const sub = document.getElementById("ps-ed-sub");
     if (sub) {
+      const inQuery = isFeed ? feedShown : isMisses ? missShown : shown;
       sub.textContent = query.trim()
-        ? (isFeed ? feedShown : shown) + " matching “" + query.trim() + "”"
+        ? inQuery + " matching “" + query.trim() + "”"
         : rows.filter((r) => r.cand.kind === "headline").length + " of " + rows.length + " matchable";
     }
 
     const empty = document.getElementById("ps-ed-empty");
     if (empty) {
-      empty.hidden = isFeed || shown > 0 || !rows.length;
+      empty.hidden = isFeed || isMisses || shown > 0 || !rows.length;
       if (!empty.hidden && query.trim()) {
         empty.textContent = "Nothing matches “" + query.trim() + "” in this view.";
       }
@@ -686,9 +769,15 @@
     bar.appendChild(sub);
 
     tabs.length = 0;
-    for (const [v, label] of [["headline", "headlines"], ["all", "all"],
-                              ["edited", "edited"], ["feed", "feed"]]) {
+    for (const [v, label, title] of [
+      ["headline", "headlines"],
+      ["all", "all"],
+      ["edited", "edited"],
+      ["misses", "misses", "Stories on this page with no headline the editor can offer, and why"],
+      ["feed", "feed"]
+    ]) {
       const btn = el("button", "ps-ed-btn", label);
+      if (title) btn.title = title;
       btn.addEventListener("click", () => { view = v; applyFilter(); });
       tabs.push({ view: v, label, btn });
       bar.appendChild(btn);
@@ -727,6 +816,15 @@
     feedBox.id = "ps-ed-feed";
     feedBox.hidden = true;
     panel.appendChild(feedBox);
+
+    const missBox = el("div", "ps-ed-list");
+    missBox.id = "ps-ed-misses";
+    missBox.hidden = true;
+    panel.appendChild(missBox);
+
+    // Independent of the feed: what the matcher can reach is a property of the
+    // page, so it is worth seeing even when the background worker is unreachable.
+    renderMisses(cands);
 
     requestFeed((data) => {
       feed = data;
@@ -811,6 +909,7 @@
     clearActive();
     rows = [];
     feedRows.length = 0;
+    missRows.length = 0;
     query = "";
   }
 

@@ -399,10 +399,50 @@
     return best;
   }
 
+  // Every story link on the page, paired with the candidate the editor would
+  // offer for it. A link with no headline-kind candidate is a story the reader
+  // can see and the editor cannot reach -- which is the failure worth hunting,
+  // because nothing else on screen says it happened.
+  function coverage(cands) {
+    const best = new Map();
+    for (const c of cands) {
+      if (!c.href) continue;
+      const cur = best.get(c.href);
+      if (!cur || (c.kind === "headline" && cur.kind !== "headline")) best.set(c.href, c);
+    }
+
+    const out = [];
+    const seen = new Set();
+    for (const a of document.querySelectorAll("a[href]")) {
+      if (a.closest(OURS)) continue;
+      if (!ARTICLE_HREF.test(a.getAttribute("href") || "")) continue;
+      if (seen.has(a.href)) continue;
+      seen.add(a.href);
+      out.push({ href: a.href, link: a, cand: best.get(a.href) || null });
+    }
+    return out;
+  }
+
+  // For a story the editor cannot reach: the elements inside its link that came
+  // closest, each with the reason it was passed over. Longest text first --
+  // whatever the headline is, it is usually the longest run in the card.
+  function nearMisses(link, opts) {
+    const o = opts_(opts);
+    const out = [];
+    for (const el of link.querySelectorAll(SELECTOR)) {
+      const got = inspect(el, o);
+      const text = got.text || normalize(blockText(el));
+      if (!text || text.split(" ").length < 2) continue;
+      out.push({ el, text, tag: el.tagName.toLowerCase(), reason: got.reason || null });
+    }
+    out.sort((a, b) => b.text.length - a.text.length);
+    return out.slice(0, 3);
+  }
+
   const api = {
     PUNCT, normalize, normalizeMap, key, squeeze, candidates, findTarget,
     classify, hasSeam, markContainers, safeToRewrite, blockText, flattenText,
-    inspect,
+    inspect, coverage, nearMisses,
     SELECTOR, BLOCKISH, BLOCK_TAGS, MAX_LEN, MAX_CHILDREN
   };
   if (typeof module === "object" && module.exports) module.exports = api;
