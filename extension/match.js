@@ -20,24 +20,40 @@
 
   // Folds smart punctuation to ASCII, collapses whitespace runs to one space,
   // and drops leading/trailing space. Idempotent.
-  function normalize(raw) {
+  //
+  // Also returns src[]: for each character of the result, the index in `raw` it
+  // came from. A collapsed whitespace run points at the FIRST space of the run.
+  // That is what lets content.js turn an op offset -- which indexes the
+  // normalized string -- back into a position in the live text nodes.
+  function normalizeMap(raw) {
     const out = [];
-    let pendingSpace = false;
+    const src = [];
+    let pendingAt = -1;
     for (let i = 0; i < raw.length; i++) {
       let ch = raw[i];
       if (PUNCT[ch]) ch = PUNCT[ch];
-      if (/\s/.test(ch)) { pendingSpace = out.length > 0; continue; }
-      if (pendingSpace) { out.push(" "); pendingSpace = false; }
+      if (/\s/.test(ch)) {
+        if (out.length > 0 && pendingAt < 0) pendingAt = i;
+        continue;
+      }
+      if (pendingAt >= 0) { out.push(" "); src.push(pendingAt); pendingAt = -1; }
       out.push(ch);
+      src.push(i);
     }
-    return out.join("");
+    return { text: out.join(""), src };
   }
+
+  const normalize = (raw) => normalizeMap(raw).text;
 
   const key = (s) => normalize(s).toLowerCase();
 
   const SELECTOR = "h1, h2, h3, h4, p, span, a, div";
   const MAX_LEN = 400;
-  const MAX_CHILDREN = 4;
+
+  // Was 4, which is a fine bound for a headline made of inline spans but drops
+  // one built out of per-line wrapper elements. applyOps no longer cares how
+  // many children an element has, so this is only a sanity ceiling now.
+  const MAX_CHILDREN = 12;
 
   // Our own UI is full of headline-shaped text. Without this the matcher would
   // annotate the editor's own rows, and the editor would offer them as candidates.
@@ -71,9 +87,69 @@
     return null;
   }
 
+  // Elements that put a visible break in the text around them.
+  const BLOCKISH = "p, div, h1, h2, h3, h4, h5, h6, ul, ol, li, section, " +
+                   "article, header, footer, figure, figcaption, blockquote, br";
+
+  const BLOCK_TAGS = new Set(("P DIV H1 H2 H3 H4 H5 H6 UL OL LI SECTION ARTICLE " +
+    "HEADER FOOTER FIGURE FIGCAPTION BLOCKQUOTE BR").split(" "));
+
+  // The text of an element as the matcher sees it.
+  //
+  // textContent concatenates with no separator, so a headline broken across
+  // lines -- "Trump Wants to Move On<br>From the Middle East", or one wrapper
+  // <div> per line -- collapses to "Move OnFrom", which is not a sentence any
+  // reader saw and never matches anything anybody would type. Rendering a block
+  // boundary as a space fixes that; normalize() then collapses the run.
+  //
+  // Identical to textContent whenever there are no blocks inside, which is
+  // every annotation authored before this existed.
+  function blockText(el) {
+    // Leaf first: no children at all means nothing to walk, and it skips the
+    // querySelector for most of the several thousand elements on a front page.
+    if (!el.childElementCount) return el.textContent || "";
+    if (!el.querySelector(BLOCKISH)) return el.textContent || "";
+    let out = "";
+    (function walk(n) {
+      for (const c of n.childNodes) {
+        if (c.nodeType === 3) { out += c.nodeValue; continue; }
+        if (c.nodeType !== 1) continue;
+        const block = BLOCK_TAGS.has(c.tagName);
+        if (block) out += " ";
+        walk(c);
+        if (block) out += " ";
+      }
+    })(el);
+    return out;
+  }
+
+  // blockText again, remembering which text node and offset every character
+  // came from, so ops can be applied to the live nodes instead of rebuilding
+  // the element. Block spaces are synthetic and carry node null.
+  //
+  // Must stay character-for-character identical to blockText; test-match.js
+  // asserts it on every fixture.
+  function flattenText(el) {
+    const chars = [], nodes = [], offsets = [];
+    (function walk(n) {
+      for (const c of n.childNodes) {
+        if (c.nodeType === 3) {
+          const t = c.nodeValue;
+          for (let i = 0; i < t.length; i++) { chars.push(t[i]); nodes.push(c); offsets.push(i); }
+          continue;
+        }
+        if (c.nodeType !== 1) continue;
+        const block = BLOCK_TAGS.has(c.tagName);
+        if (block) { chars.push(" "); nodes.push(null); offsets.push(-1); }
+        walk(c);
+        if (block) { chars.push(" "); nodes.push(null); offsets.push(-1); }
+      }
+    })(el);
+    return { raw: chars.join(""), nodes, offsets };
+  }
+
   // True when this element's text is several pieces run together rather than one
-  // run of prose. textContent concatenates children with no separator, so a card
-  // wrapping a kicker, a headline and a badge yields
+  // run of prose. A card wrapping a kicker, a headline and a badge yields
   //
   //   "Times InvestigationHow the Fouled Reflecting Pool...Washington11 min read"
   //
@@ -83,6 +159,10 @@
   function hasSeam(el) {
     let prevEnd = "";
     for (const node of el.childNodes) {
+      // A block child or a <br> is a visible break, and blockText renders it as
+      // a space, so it separates rather than seams. Without this a two-line
+      // headline looks exactly like a card and is refused.
+      if (node.nodeType === 1 && BLOCK_TAGS.has(node.tagName)) { prevEnd = " "; continue; }
       const t = node.textContent || "";
       if (!t) continue;
       if (prevEnd && !/\s/.test(prevEnd) && !/\s/.test(t[0])) return true;
@@ -91,19 +171,20 @@
     return false;
   }
 
-  // Elements whose presence means the text is laid out in blocks. Annotating
-  // works by rebuilding an element's contents as text plus annotation spans,
-  // which flattens whatever was inside it -- fine for a headline, destructive
-  // for a card, where the kicker, headline and badge are separate blocks and
-  // collapse onto one line.
-  const BLOCKISH = "p, div, h1, h2, h3, h4, h5, h6, ul, ol, li, section, " +
-                   "article, header, footer, figure, figcaption, blockquote, br";
-
   // Whether annotating this element would preserve the page. Nothing may be
   // annotated unless this holds -- a mis-keyed annotation must render nothing,
   // never damage the publisher's layout.
+  //
+  // This used to refuse any element with a block descendant, because applyOps
+  // rebuilt the element's contents and flattening a card collapsed its kicker,
+  // headline and badge onto one line. applyOps now splits the existing text
+  // nodes and leaves every element in place, so there is nothing left to
+  // flatten and the ban has been lifted -- which is what makes a headline
+  // wrapped in per-line <div>s reachable at all.
+  //
+  // A card still gets past this test and still must not be offered as a
+  // headline; markContainers/classify are what demote it.
   function safeToRewrite(el) {
-    if (el.querySelector(BLOCKISH)) return false;
     return !hasSeam(el);
   }
 
@@ -202,6 +283,14 @@
   // two element children so that <h3>Trump Says <em>No Deal</em></h3> -- one
   // child, no seam -- is left alone. Headings are exempt: a heading holding
   // sub-elements is still the headline.
+  //
+  // Known limitation, now that blocks are allowed as candidates: a headline
+  // split across per-line wrapper elements is a container too, and if the
+  // wrapper is not a heading it is demoted while its half-headlines are
+  // offered. Structurally that is indistinguishable from a card holding a
+  // kicker and a headline, so there is nothing to test on. The misses view
+  // names it -- "wraps other candidates" -- and the "all" tab still offers the
+  // wrapper, which is the whole reason that tab exists.
   function markContainers(list) {
     const elems = new Set(list.map((c) => c.el));
     const containers = new Set();
@@ -220,8 +309,9 @@
   const opts_ = (opts) => Object.assign({ minWords: 3, skipAttr: null }, opts);
 
   // Why this element cannot be offered as a headline, or its normalized text
-  // when it can. Pulled out of candidates() so the reasons have one home and
-  // anything else that needs to explain a skipped headline can reuse them.
+  // when it can. Both the candidate scan and the editor's "misses" view go
+  // through here, so the list of what was skipped and the reasons given for
+  // skipping it cannot drift apart.
   function inspect(el, opts) {
     const o = opts_(opts);
 
@@ -230,17 +320,18 @@
     // A photo credit sits above the headline in the DOM and is easily long
     // enough to look like one. It is never the story's headline.
     if (el.closest("figcaption")) return { reason: "photo caption or credit" };
-
     if (o.skipAttr && el.closest("[" + o.skipAttr + "]")) return { reason: "already annotated" };
     if (el.childElementCount > MAX_CHILDREN) {
       return { reason: "more than " + MAX_CHILDREN + " child elements" };
     }
 
-    const raw = el.textContent;
-    if (!raw) return { reason: "no text" };
-    if (raw.length > MAX_LEN) return { reason: "longer than " + MAX_LEN + " characters" };
+    // Cheap bound first. blockText only ever ADDS spaces, so anything already
+    // past the limit by textContent is past it either way.
+    const rough = el.textContent;
+    if (!rough) return { reason: "no text" };
+    if (rough.length > MAX_LEN) return { reason: "longer than " + MAX_LEN + " characters" };
 
-    const text = normalize(raw);
+    const text = normalize(blockText(el));
     if (!text) return { reason: "no text" };
 
     const n = text.split(" ").length;
@@ -254,7 +345,7 @@
 
   // Every element whose whole text could be a headline, deduped by normalized
   // key. Keeps the DEEPEST element per key: an ancestor may also "contain" the
-  // headline, and rewriting that would destroy neighbouring content.
+  // headline, and annotating that would wrap neighbouring content too.
   function candidates(opts) {
     const o = opts_(opts);
     const byKey = new Map();
@@ -278,9 +369,17 @@
     return classify(markContainers([...byKey.values()]));
   }
 
+  // blockText differs from textContent only by inserted spaces, so with every
+  // space removed the two are identical. That makes this a sound cheap filter:
+  // anything whose squeezed text differs cannot match, and we skip it without
+  // paying for the block-aware walk.
+  const squeeze = (s) => key(s).replace(/ /g, "");
+
   // The single deepest element matching one headline key, or null.
   function findTarget(headlineKey, skipAttr) {
     let best = null;
+    const squeezed = headlineKey.replace(/ /g, "");
+
     for (const el of document.querySelectorAll(SELECTOR)) {
       if (el.closest(OURS)) continue;
       if (skipAttr && el.hasAttribute(skipAttr)) continue;
@@ -288,7 +387,8 @@
 
       const txt = el.textContent;
       if (!txt || txt.length > MAX_LEN) continue;
-      if (key(txt) !== headlineKey) continue;
+      if (squeeze(txt) !== squeezed) continue;
+      if (key(blockText(el)) !== headlineKey) continue;
 
       // A match is not enough. Rewriting a container flattens its blocks and
       // wrecks the page, so an annotation keyed to one renders nothing instead.
@@ -300,8 +400,10 @@
   }
 
   const api = {
-    PUNCT, normalize, key, candidates, findTarget, classify, hasSeam,
-    markContainers, safeToRewrite, inspect, SELECTOR
+    PUNCT, normalize, normalizeMap, key, squeeze, candidates, findTarget,
+    classify, hasSeam, markContainers, safeToRewrite, blockText, flattenText,
+    inspect,
+    SELECTOR, BLOCKISH, BLOCK_TAGS, MAX_LEN, MAX_CHILDREN
   };
   if (typeof module === "object" && module.exports) module.exports = api;
   else root.PS_MATCH = api;

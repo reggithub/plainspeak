@@ -19,107 +19,24 @@
   // must agree on what a headline is, or the editor emits annotations that
   // silently never render.
 
-  const { normalize, key } = PS_MATCH;
-
-  // ------------------------------------------------------------ text indexing
-  //
-  // Flattens an element's text nodes into one string, remembering which node and
-  // offset each character came from. Handles headlines split across <span>s.
-
-  function flatten(el) {
-    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-    const chars = [];
-    const nodes = [];
-    const offsets = [];
-    let n;
-    while ((n = walker.nextNode())) {
-      const t = n.nodeValue;
-      for (let i = 0; i < t.length; i++) {
-        chars.push(t[i]);
-        nodes.push(n);
-        offsets.push(i);
-      }
-    }
-    return { raw: chars.join(""), nodes, offsets };
-  }
+  const { key } = PS_MATCH;
 
   // --------------------------------------------------------------- candidates
   //
   // The deepest element whose text equals the headline. Deepest matters: an
-  // ancestor container may also "contain" the headline, and rewriting that would
-  // destroy neighbouring content.
+  // ancestor may also "contain" the headline, and annotating that would put the
+  // strikes and inserts around neighbouring content as well.
 
   const findTarget = (headlineKey) => PS_MATCH.findTarget(headlineKey, DONE_ATTR);
 
   // ------------------------------------------------------------------- render
 
-  function span(cls, text) {
-    const s = document.createElement("span");
-    s.className = cls;
-    s.textContent = text;
-    return s;
-  }
-
+  // The ops themselves are applied by apply.js, which splits the element's
+  // existing text nodes rather than rebuilding it. Everything left here is the
+  // annotation's furniture: the source dagger, the attribution class, the mark
+  // that stops the next run re-annotating the same headline.
   function applyOps(el, ann) {
-    const flat = flatten(el);
-    const nText = normalize(flat.raw);
-
-    // Sort descending so applying one op never shifts the offsets of the next.
-    const ops = [...ann.ops].sort((a, b) => {
-      const pa = a.t === "strike" ? a.start : a.at;
-      const pb = b.t === "strike" ? b.start : b.at;
-      return pb - pa;
-    });
-
-    for (const op of ops) {
-      const pos = op.t === "strike" ? op.start : op.at;
-      if (pos < 0 || pos > nText.length) return false;
-      if (op.t === "strike" && pos + op.len > nText.length) return false;
-    }
-
-    // Rebuild the element's text content with annotation spans woven in. This
-    // flattens whatever markup was inside, which is why findTarget refuses any
-    // element containing block-level children: flattening a card collapsed its
-    // kicker, headline and badge onto one line and mangled the page.
-    const pieces = []; // {type, text}
-    let cursor = 0;
-    const asc = [...ops].reverse();
-
-    for (const op of asc) {
-      const pos = op.t === "strike" ? op.start : op.at;
-      if (pos > cursor) {
-        pieces.push({ type: "keep", text: nText.slice(cursor, pos) });
-        cursor = pos;
-      }
-      if (op.t === "strike") {
-        pieces.push({ type: "strike", text: nText.slice(pos, pos + op.len) });
-        cursor = pos + op.len;
-      } else {
-        pieces.push({ type: "insert", text: op.text });
-      }
-    }
-    if (cursor < nText.length) {
-      pieces.push({ type: "keep", text: nText.slice(cursor) });
-    }
-
-    const frag = document.createDocumentFragment();
-    for (const p of pieces) {
-      if (p.type === "keep") {
-        frag.appendChild(document.createTextNode(p.text));
-      } else if (p.type === "strike") {
-        const s = span("ps-del", p.text);
-        s.setAttribute("aria-label", "struck by Plainspeak: " + p.text);
-        frag.appendChild(s);
-      } else {
-        // A script-face comma or period carries wide left side bearing, which
-        // reads as a space after the publisher's last letter. CSS cannot select
-        // on content, so flag it here and let the stylesheet pull it back.
-        const tight = /^[,.;:!?)\]]/.test(p.text);
-        const s = span("ps-ins" + (tight ? " ps-tight" : ""), p.text);
-        s.setAttribute("aria-label", "Plainspeak annotation: " + p.text);
-        frag.appendChild(s);
-      }
-    }
+    if (!PS_APPLY.applyOps(el, ann.ops || [], document)) return false;
 
     if (ann.source) {
       const a = document.createElement("a");
@@ -131,11 +48,9 @@
       a.title = (ann.note ? ann.note + " \u2014 " : "") + "Source: " + ann.source;
       a.setAttribute("aria-label", "Plainspeak source note. " + (ann.note || ""));
       a.addEventListener("click", (e) => e.stopPropagation());
-      frag.appendChild(a);
+      el.appendChild(a);
     }
 
-    el.textContent = "";
-    el.appendChild(frag);
     el.setAttribute(DONE_ATTR, ann.id || "1");
     el.classList.add("ps-annotated");
     return true;

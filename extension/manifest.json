@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Plainspeak",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Reader's assistant. Renders Plainspeak's editorial annotations on headlines, marked as ours.",
 
   "permissions": ["storage"],
@@ -21,7 +21,7 @@
         "https://www.nytimes.com/international/",
         "https://www.nytimes.com/ca/"
       ],
-      "js": ["match.js", "diff.js", "feed.js", "content.js", "editor.js"],
+      "js": ["match.js", "diff.js", "apply.js", "feed.js", "content.js", "editor.js"],
       "css": ["annotate.css", "editor.css"],
       "run_at": "document_idle"
     }

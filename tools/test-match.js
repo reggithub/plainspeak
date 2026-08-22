@@ -5,7 +5,8 @@
  * cases below are the NYT front-page card shapes it has to get right.
  */
 
-const { classify, normalize, key, hasSeam, safeToRewrite } = require("../extension/match.js");
+const { classify, normalize, normalizeMap, key, squeeze, hasSeam, safeToRewrite,
+        blockText, flattenText, BLOCK_TAGS, PUNCT } = require("../extension/match.js");
 
 let failures = 0;
 
@@ -122,28 +123,133 @@ for (const [label, el, want] of SEAMS) {
   else { failures++; console.log("  FAIL " + label + " -> " + got + ", want " + want); }
 }
 
-console.log("\nsafeToRewrite - annotating flattens an element, so blocks inside are fatal");
+console.log("\nseam detection across block children");
 
-// querySelector is the only DOM call safeToRewrite makes beyond hasSeam.
-const target = (sel, kids) => ({
-  querySelector: (q) => (sel ? { tag: sel } : null),
-  childNodes: kids || [node("A Perfectly Ordinary Headline")]
-});
+// Enough of a DOM to exercise the block-aware paths. Text nodes and elements
+// only; that is all blockText, flattenText and hasSeam ever touch.
+const T = (t) => ({ nodeType: 3, nodeValue: t, textContent: t });
 
-const SAFE = [
-  ["plain headline, one text node", target(null), true],
-  ["headline with an inline <em>", target(null,
-    [node("Trump Says "), node("No Deal"), node(" to Congress")]), true],
-  ["card containing a <p>", target("p"), false],
-  ["anything containing a <br>", target("br"), false],
-  ["no blocks but text runs together", target(null,
-    [node("Times Investigation"), node("How the Pool")]), false]
+function E(tag, ...kids) {
+  const self = {
+    nodeType: 1,
+    tagName: tag.toUpperCase(),
+    childNodes: kids,
+    childElementCount: kids.filter((k) => k.nodeType === 1).length,
+    get textContent() { return kids.map((k) => k.textContent).join(""); },
+    querySelector: () => (deepBlock(self) ? {} : null)
+  };
+  return self;
+}
+
+const deepBlock = (n) => (n.childNodes || []).some(
+  (c) => c.nodeType === 1 && (BLOCK_TAGS.has(c.tagName) || deepBlock(c)));
+
+const BLOCK_SEAMS = [
+  ["headline broken by a <br> is not a seam",
+    E("h1", T("Trump Wants to Move On"), E("br"), T("From the Middle East")), false],
+  ["headline in per-line wrapper divs is not a seam",
+    E("h1", E("div", T("Trump Wants to Move On")), E("div", T("From the Middle East"))), false],
+  ["kicker and headline as sibling blocks is still a seam at the text level",
+    E("div", T("Times Investigation"), T("How the Pool Came to Mirror")), true]
 ];
 
-for (const [label, el, want] of SAFE) {
-  const got = safeToRewrite(el);
+for (const [label, el2, want] of BLOCK_SEAMS) {
+  const got = hasSeam(el2);
   if (got === want) console.log("  ok   " + label);
   else { failures++; console.log("  FAIL " + label + " -> " + got + ", want " + want); }
+}
+
+console.log("\nsafeToRewrite - applyOps edits text nodes in place, so blocks are allowed");
+
+const SAFE = [
+  ["plain headline, one text node", E("p", T("A Perfectly Ordinary Headline")), true],
+  ["headline with an inline <em>",
+    E("p", T("Trump Says "), E("em", T("No Deal")), T(" to Congress")), true],
+  // These two were refused outright before. Reaching them is the whole point:
+  // a front page wraps its biggest headlines in exactly this shape.
+  ["headline broken by a <br>",
+    E("h1", T("Trump Wants to Move On"), E("br"), T("From the Middle East")), true],
+  ["headline in per-line wrapper divs",
+    E("h1", E("div", T("Trump Wants to Move On")), E("div", T("From the Middle East"))), true],
+  ["text that runs together is still refused",
+    E("div", T("Times Investigation"), T("How the Pool")), false]
+];
+
+for (const [label, el2, want] of SAFE) {
+  const got = safeToRewrite(el2);
+  if (got === want) console.log("  ok   " + label);
+  else { failures++; console.log("  FAIL " + label + " -> " + got + ", want " + want); }
+}
+
+console.log("\nblockText - a block boundary reads as a space");
+
+const TEXTS = [
+  ["plain text is untouched", E("p", T("An Ordinary Headline")), "An Ordinary Headline"],
+  ["inline markup is untouched",
+    E("p", T("Trump Says "), E("em", T("No Deal")), T(" to Congress")),
+    "Trump Says No Deal to Congress"],
+  ["<br> becomes a space",
+    E("h1", T("Trump Wants to Move On"), E("br"), T("From the Middle East")),
+    "Trump Wants to Move On  From the Middle East"],
+  ["wrapper divs become spaces",
+    E("h1", E("div", T("Move On")), E("div", T("From the East"))),
+    " Move On  From the East "]
+];
+
+for (const [label, el2, want] of TEXTS) {
+  const got = blockText(el2);
+  if (got === want) console.log("  ok   " + label);
+  else { failures++; console.log("  FAIL " + label + "\n       got  " + JSON.stringify(got) +
+                                 "\n       want " + JSON.stringify(want)); }
+}
+
+// The whole offset scheme rests on these two agreeing character for character.
+console.log("\nflattenText agrees with blockText, and indexes every real character");
+
+for (const [label, el2] of TEXTS.map((t) => [t[0], t[1]])) {
+  const flat = flattenText(el2);
+  if (flat.raw !== blockText(el2)) {
+    failures++;
+    console.log("  FAIL " + label + " - raw disagrees with blockText");
+    continue;
+  }
+  const bad = flat.raw.split("").findIndex((ch, i) =>
+    flat.nodes[i] ? flat.nodes[i].nodeValue[flat.offsets[i]] !== ch : ch !== " ");
+  if (bad >= 0) { failures++; console.log("  FAIL " + label + " - index wrong at " + bad); }
+  else console.log("  ok   " + label);
+}
+
+console.log("\nnormalizeMap - every normalized character points back at its source");
+
+const MAPS = [
+  "  Trump’s  “Big”  Plan ",
+  "Trump Wants to Move On  From the Middle East",
+  " Move On  From the East ",
+  "Already Clean Text"
+];
+
+for (const raw of MAPS) {
+  const m = normalizeMap(raw);
+  let ok = m.text === normalize(raw) && m.src.length === m.text.length;
+  for (let i = 0; ok && i < m.text.length; i++) {
+    const srcCh = raw[m.src[i]];
+    // Either the same character, a smart-punctuation fold, or the first space
+    // of a run that collapsed to one.
+    ok = srcCh === m.text[i] ||
+         (PUNCT[srcCh] || "") === m.text[i] ||
+         (m.text[i] === " " && /\s/.test(srcCh));
+  }
+  if (ok) console.log("  ok   " + JSON.stringify(raw));
+  else { failures++; console.log("  FAIL " + JSON.stringify(raw) + " -> " + JSON.stringify(m)); }
+}
+
+console.log("\nsqueeze - the cheap prefilter findTarget uses must never rule out a real match");
+
+for (const [, el2] of TEXTS.map((t) => [t[0], t[1]])) {
+  const got = squeeze(el2.textContent);
+  const want = squeeze(blockText(el2));
+  if (got === want) console.log("  ok   " + JSON.stringify(blockText(el2).slice(0, 40)));
+  else { failures++; console.log("  FAIL squeeze differs: " + JSON.stringify(got) + " vs " + JSON.stringify(want)); }
 }
 
 console.log("\nnormalize");
