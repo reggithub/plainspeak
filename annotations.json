@@ -367,6 +367,17 @@
       "source": "https://www.nytimes.com/2026/08/20/us/politics/trump-2024-election-classified-files.html",
       "note": "",
       "expires": "2026-08-22T00:00:00Z"
+    },
+    {
+      "id": "2026-08-22-a",
+      "headline": "With Midterms Approaching, Trump Implores Republicans: Pretend I'm on the Ballot",
+      "ops": [
+        { "t": "strike", "start": 67, "len": 13 },
+        { "t": "insert", "at": 80, "text": "Sane" }
+      ],
+      "source": "https://www.nytimes.com/2026/08/21/us/politics/trump-darline-graham-south-carolina.html",
+      "note": "",
+      "expires": "2026-08-24T00:00:00Z"
     }
   ]
 }
