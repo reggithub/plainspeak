@@ -390,6 +390,17 @@
       "source": "https://www.nytimes.com/2026/08/22/us/politics/election-polls-confusion-prediction-markets.html",
       "note": "",
       "expires": "2026-08-24T00:00:00Z"
+    },
+    {
+      "id": "2026-08-22-c",
+      "headline": "Postal Service Publishes Finalized Plan to Restrict Mail Ballots",
+      "ops": [
+        { "t": "strike", "start": 43, "len": 21 },
+        { "t": "insert", "at": 64, "text": "Rig Elections" }
+      ],
+      "source": "https://www.nytimes.com/2026/08/21/us/politics/postal-service-rule-restrict-mail-ballots.html",
+      "note": "",
+      "expires": "2026-08-24T00:00:00Z"
     }
   ]
 }
