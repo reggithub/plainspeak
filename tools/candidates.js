@@ -8,9 +8,16 @@
  * live DOM after NYT's JavaScript has built it. Server HTML is a different
  * document, so anything scraped from it would not reflect what findTarget sees.
  *
- * The filters below MIRROR extension/content.js -- the PUNCT table, normalize(),
- * and the querySelectorAll/childElementCount/length rules in findTarget(). If
- * you change matching there, change it here too or this tool will lie to you.
+ * NOT AUTHORITATIVE. The editor's "misses" view is -- Alt+E, then the misses
+ * tab. That runs inside the extension against the real PS_MATCH, so it cannot
+ * drift; this file cannot reach PS_MATCH from the page world and has to keep
+ * its own copy of the rules, which is exactly how it fell behind before.
+ *
+ * What is mirrored here: the PUNCT table, normalize(), blockText() and the
+ * querySelectorAll/childElementCount/length bounds. What is NOT: the seam and
+ * container tests, and the headline/summary split. So this over-reports --
+ * cards and summaries show up alongside real headlines. Use it for the ruler
+ * and for a quick "is this text on the page at all", not for coverage.
  */
 
 (() => {
@@ -42,17 +49,41 @@
 
   const key = (s) => normalize(s).toLowerCase();
 
+  const BLOCKISH = "p, div, h1, h2, h3, h4, h5, h6, ul, ol, li, section, " +
+                   "article, header, footer, figure, figcaption, blockquote, br";
+  const BLOCK_TAGS = new Set(("P DIV H1 H2 H3 H4 H5 H6 UL OL LI SECTION ARTICLE " +
+    "HEADER FOOTER FIGURE FIGCAPTION BLOCKQUOTE BR").split(" "));
+
+  // A block boundary reads as a space, so a headline broken by a <br> or split
+  // across wrapper divs normalizes to the sentence a reader actually saw.
+  function blockText(el) {
+    if (!el.childElementCount) return el.textContent || "";
+    if (!el.querySelector(BLOCKISH)) return el.textContent || "";
+    let out = "";
+    (function walk(n) {
+      for (const c of n.childNodes) {
+        if (c.nodeType === 3) { out += c.nodeValue; continue; }
+        if (c.nodeType !== 1) continue;
+        const block = BLOCK_TAGS.has(c.tagName);
+        if (block) out += " ";
+        walk(c);
+        if (block) out += " ";
+      }
+    })(el);
+    return out;
+  }
+
   // ---- gather --------------------------------------------------------------
 
   const els = document.querySelectorAll("h1, h2, h3, h4, p, span, a, div");
   const byKey = new Map();
 
   for (const el of els) {
-    if (el.childElementCount > 4) continue;
+    if (el.childElementCount > 12) continue;
     const txt = el.textContent;
     if (!txt || txt.length > 400) continue;
 
-    const text = normalize(txt);
+    const text = normalize(blockText(el));
     if (!text) continue;
     if (text.split(" ").length < MIN_WORDS) continue;
 
