@@ -407,9 +407,8 @@
       "headline": "A Progressive Democrat in Florida Gave Her Party New Hope, and New Fears",
       "ops": [
         { "t": "strike", "start": 34, "len": 15 },
-        { "t": "insert", "at": 49, "text": "Republicans " },
-        { "t": "strike", "start": 63, "len": 4 },
-        { "t": "insert", "at": 67, "text": "Her Own Party " },
+        { "t": "insert", "at": 49, "text": "Gives Republicans " },
+        { "t": "insert", "at": 63, "text": "Her Own Party " },
         { "t": "insert", "at": 72, "text": " in the General Election" }
       ],
       "source": "https://www.nytimes.com/2026/08/22/us/politics/angie-nixon-florida-senate-socialist.html",
