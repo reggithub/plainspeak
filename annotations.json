@@ -401,6 +401,19 @@
       "source": "https://www.nytimes.com/2026/08/21/us/politics/postal-service-rule-restrict-mail-ballots.html",
       "note": "",
       "expires": "2026-08-24T00:00:00Z"
+    },
+    {
+      "id": "2026-08-22-d",
+      "headline": "A Progressive Democrat in Florida Gave Her Party New Hope, and New Fears",
+      "ops": [
+        { "t": "strike", "start": 34, "len": 15 },
+        { "t": "insert", "at": 49, "text": "Gives Republicans " },
+        { "t": "insert", "at": 63, "text": "Her Party " },
+        { "t": "insert", "at": 72, "text": " in the General Election" }
+      ],
+      "source": "https://www.nytimes.com/2026/08/22/us/politics/angie-nixon-florida-senate-socialist.html",
+      "note": "",
+      "expires": "2026-08-24T00:00:00Z"
     }
   ]
 }
