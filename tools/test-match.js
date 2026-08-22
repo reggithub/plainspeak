@@ -45,12 +45,42 @@ check("a heading is a headline even without a link",
   [{ tag: "h1", href: null }, { tag: "h2", href: null }],
   ["headline", "headline"]);
 
-// Known over-count: a heading is always a headline, so a card whose summary
-// appears before its heading yields two. Over-including is the safe direction --
-// the row is offered rather than hidden.
-check("summary before heading in the same card marks both",
+// Was a known over-count: the summary reached the loop first and claimed the
+// link, and the heading was marked a headline anyway, so the card yielded two.
+// Headings now claim their link in a pass of their own, before anything else
+// looks at it, so the summary is correctly demoted whatever order it arrives in.
+check("summary before heading in the same card - heading still wins",
   [{ tag: "p", href: A }, { tag: "h3", href: A }],
-  ["headline", "headline"]);
+  ["text", "headline"]);
+
+// The kicker is shallower than the headline, so it reaches the list first and
+// used to take the slot -- on a front page where most headlines are <p>, that
+// silently hid the biggest stories.
+check("a short kicker does not outrank the headline it sits above",
+  [{ tag: "span", href: A, text: "Times Investigation" },
+   { tag: "p", href: A, text: "How the Fouled Reflecting Pool Came to Mirror Washington" }],
+  ["text", "headline"]);
+
+check("a genuinely short headline is still kept when nothing longer shares its link",
+  [{ tag: "p", href: A, text: "Blanche Confirmed" }],
+  ["headline"]);
+
+// The photo card that this came from. In the DOM the credit comes FIRST, before
+// the headline, and is seven words long -- so picking the earliest candidate
+// over three words handed it the story link and demoted the real headline to
+// text. Nothing about the markup separates them; only the drawn size does.
+globalThis.getComputedStyle = (n) => ({ fontSize: ((n && n.px) || 12) + "px" });
+
+check("a photo credit does not outrank the headline below it",
+  [{ tag: "figcaption", href: A, el: { px: 11 }, text: "Saul Martinez for The New York Times" },
+   { tag: "p", href: A, el: { px: 22 },
+     text: "A Progressive Democrat in Florida Gave Her Party New Hope, and New Fears" },
+   { tag: "p", href: A, el: { px: 15 },
+     text: "Angie Nixon, a state lawmaker from Jacksonville, shocked Democrats in red Florida." },
+   { tag: "span", href: A, el: { px: 10 }, text: "6 MIN READ" }],
+  ["text", "headline", "text", "text"]);
+
+delete globalThis.getComputedStyle;
 
 check("three-deck card: headline, summary, byline",
   [{ tag: "p", href: A }, { tag: "p", href: A }, { tag: "span", href: A }],

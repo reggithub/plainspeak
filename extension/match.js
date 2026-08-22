@@ -47,15 +47,26 @@
   const ARTICLE_HREF = /\/\d{4}\/\d{2}\/\d{2}\//;
 
   // Which article a run of text belongs to, if any. The link may wrap the text
-  // itself, or wrap the whole card the text sits inside, so walk up a little.
+  // itself, or wrap the whole card the text sits inside.
+  //
+  // This used to stop after four parentElement hops. NYT's front nests a card's
+  // headline six to ten levels below its <a>, so the walk gave up and returned
+  // null -- and classify() can only call an hrefless, non-heading element
+  // "text". The page's biggest stories are <p> and <span>, not <h3>, so exactly
+  // the substantive headlines fell out of the editor's default view while nav
+  // chrome shallow enough to find its link stayed in. closest() has no depth
+  // limit and is the native ancestor walk, so it is both correct and faster.
   function articleHref(el) {
-    let n = el;
+    const own = el.closest("a[href]");
+    if (own && ARTICLE_HREF.test(own.getAttribute("href") || "")) return own.href;
+
+    // No enclosing link: the text may be a sibling of one, inside a card that
+    // links from a child instead. Bounded, because at enough hops every element
+    // "contains" some article link and the answer stops meaning anything.
+    let n = el.parentElement;
     for (let hops = 0; n && hops < 4; hops++, n = n.parentElement) {
-      if (n.tagName === "A" && ARTICLE_HREF.test(n.getAttribute("href") || "")) return n.href;
-      if (hops > 0) {
-        const a = n.querySelector("a[href]");
-        if (a && ARTICLE_HREF.test(a.getAttribute("href") || "")) return a.href;
-      }
+      const a = n.querySelector("a[href]");
+      if (a && ARTICLE_HREF.test(a.getAttribute("href") || "")) return a.href;
     }
     return null;
   }
@@ -96,6 +107,49 @@
     return !hasSeam(el);
   }
 
+  // Shortest run of words that will be taken for a headline over something else
+  // pointing at the same story. Kickers -- "Live", "Analysis", "Times
+  // Investigation" -- fall under it; headlines essentially never do.
+  const MIN_HEADLINE_WORDS = 3;
+
+  // Fixtures in test-match.js carry no text; treat that as "long enough".
+  const wordCount = (c) =>
+    c.text == null ? Infinity : c.text.trim().split(/\s+/).filter(Boolean).length;
+
+  // How big this text is actually drawn, cached per candidate.
+  //
+  // Document order was the wrong way to pick the headline out of a card. On a
+  // photo card the credit -- "Saul Martinez for The New York Times" -- comes
+  // first in the DOM and is long enough to pass for a headline, so it claimed
+  // the story link and the real headline was demoted to text. Size is the
+  // signal a reader uses and the one the page is built around: the headline is
+  // drawn larger than the summary, the credit and the "6 MIN READ" badge.
+  //
+  // Only ever called for candidates that share a story link, which is a handful
+  // per page -- getComputedStyle forces layout and is too costly to run over
+  // every element on an NYT front.
+  function fontSize(c) {
+    if (c.size != null) return c.size;
+    c.size = 0;
+    try {
+      if (c.el && typeof getComputedStyle === "function") {
+        c.size = parseFloat(getComputedStyle(c.el).fontSize) || 0;
+      }
+    } catch (e) { /* detached node, or no view */ }
+    return c.size;
+  }
+
+  // Is `a` the better headline for a story than `b`? Falls back to word count
+  // and then to document order, which is all the plain-object test fixtures --
+  // and any page where the sizes tie -- have to go on.
+  function better(a, b) {
+    const fa = fontSize(a), fb = fontSize(b);
+    if (fa !== fb) return fa > fb;
+    const la = wordCount(a) >= MIN_HEADLINE_WORDS, lb = wordCount(b) >= MIN_HEADLINE_WORDS;
+    if (la !== lb) return la;
+    return false;
+  }
+
   // Separates story headlines from the summaries, blurbs, cards and nav text that
   // share the same shape.
   //
@@ -105,21 +159,40 @@
   //
   // Deliberately generous: the editor still offers everything under its "all"
   // view, so a misfire hides a headline rather than losing it.
+
   function classify(list) {
+    const eligible = list.filter((c) => !c.seam && !c.container);
+
+    // Headings claim their story link before anything else looks at it. Done in
+    // one pass rather than inline, because a summary sitting earlier in the list
+    // used to take the slot and leave the real headline classified as text.
     const claimed = new Set();
+    for (const c of eligible) if (/^h[1-4]$/.test(c.tag) && c.href) claimed.add(c.href);
+
+    // One headline per story link. Prefer the first candidate long enough to be
+    // one: a card's kicker -- "Times Investigation", "Live" -- resolves to the
+    // same link and, being shallower, often reaches the list first. Fall back to
+    // the first candidate outright, so a genuinely short headline is not lost.
+    const winner = new Map();
+    for (const c of eligible) {
+      if (!c.href || claimed.has(c.href)) continue;
+      const cur = winner.get(c.href);
+      if (!cur || better(c, cur)) winner.set(c.href, c);
+    }
+
+    // `why` is only for the editor's misses view, which has to explain a
+    // headline that is on the page but not in the default list.
     for (const c of list) {
-      if (c.seam || c.container) {
+      if (c.seam) { c.kind = "text"; c.why = "text runs together — a card, not a sentence"; }
+      else if (c.container) { c.kind = "text"; c.why = "wraps other candidates — a card, not a headline"; }
+      else if (/^h[1-4]$/.test(c.tag)) c.kind = "headline";
+      else if (!c.href) { c.kind = "text"; c.why = "no story link found from here"; }
+      else if (winner.get(c.href) === c) c.kind = "headline";
+      else {
         c.kind = "text";
-        continue;
-      }
-      if (/^h[1-4]$/.test(c.tag)) {
-        c.kind = "headline";
-        if (c.href) claimed.add(c.href);
-      } else if (c.href && !claimed.has(c.href)) {
-        c.kind = "headline";
-        claimed.add(c.href);
-      } else {
-        c.kind = "text";
+        const w = winner.get(c.href);
+        c.why = "this story link is already claimed by " +
+          (w ? "<" + w.tag + "> “" + (w.text || "").slice(0, 60) + "”" : "a heading");
       }
     }
     return list;
@@ -144,26 +217,52 @@
     return list;
   }
 
+  const opts_ = (opts) => Object.assign({ minWords: 3, skipAttr: null }, opts);
+
+  // Why this element cannot be offered as a headline, or its normalized text
+  // when it can. Pulled out of candidates() so the reasons have one home and
+  // anything else that needs to explain a skipped headline can reuse them.
+  function inspect(el, opts) {
+    const o = opts_(opts);
+
+    if (el.closest(OURS)) return { reason: "Plainspeak's own UI" };
+
+    // A photo credit sits above the headline in the DOM and is easily long
+    // enough to look like one. It is never the story's headline.
+    if (el.closest("figcaption")) return { reason: "photo caption or credit" };
+
+    if (o.skipAttr && el.closest("[" + o.skipAttr + "]")) return { reason: "already annotated" };
+    if (el.childElementCount > MAX_CHILDREN) {
+      return { reason: "more than " + MAX_CHILDREN + " child elements" };
+    }
+
+    const raw = el.textContent;
+    if (!raw) return { reason: "no text" };
+    if (raw.length > MAX_LEN) return { reason: "longer than " + MAX_LEN + " characters" };
+
+    const text = normalize(raw);
+    if (!text) return { reason: "no text" };
+
+    const n = text.split(" ").length;
+    if (n < o.minWords) return { reason: "only " + n + (n === 1 ? " word" : " words") };
+
+    // Never offer what the matcher will refuse to touch.
+    if (!safeToRewrite(el)) return { reason: "text runs together — a card, not a sentence" };
+
+    return { text };
+  }
+
   // Every element whose whole text could be a headline, deduped by normalized
   // key. Keeps the DEEPEST element per key: an ancestor may also "contain" the
   // headline, and rewriting that would destroy neighbouring content.
   function candidates(opts) {
-    const o = Object.assign({ minWords: 3, skipAttr: null }, opts);
+    const o = opts_(opts);
     const byKey = new Map();
 
     for (const el of document.querySelectorAll(SELECTOR)) {
-      if (el.closest(OURS)) continue;
-      if (o.skipAttr && el.closest("[" + o.skipAttr + "]")) continue;
-      if (el.childElementCount > MAX_CHILDREN) continue;
-
-      const txt = el.textContent;
-      if (!txt || txt.length > MAX_LEN) continue;
-
-      const text = normalize(txt);
-      if (!text || text.split(" ").length < o.minWords) continue;
-
-      // Never offer what the matcher will refuse to touch.
-      if (!safeToRewrite(el)) continue;
+      const got = inspect(el, o);
+      if (!got.text) continue;
+      const text = got.text;
 
       const k = text.toLowerCase();
       const prev = byKey.get(k);
@@ -202,7 +301,7 @@
 
   const api = {
     PUNCT, normalize, key, candidates, findTarget, classify, hasSeam,
-    markContainers, safeToRewrite, SELECTOR
+    markContainers, safeToRewrite, inspect, SELECTOR
   };
   if (typeof module === "object" && module.exports) module.exports = api;
   else root.PS_MATCH = api;
