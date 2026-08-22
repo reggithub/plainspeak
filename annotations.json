@@ -378,6 +378,18 @@
       "source": "https://www.nytimes.com/2026/08/21/us/politics/trump-darline-graham-south-carolina.html",
       "note": "",
       "expires": "2026-08-24T00:00:00Z"
+    },
+    {
+      "id": "2026-08-22-b",
+      "headline": "Polling Chaos Could Create Big Problems for American Politics",
+      "ops": [
+        { "t": "insert", "at": 0, "text": "Fake " },
+        { "t": "strike", "start": 8, "len": 36 },
+        { "t": "insert", "at": 44, "text": "Manipulates " }
+      ],
+      "source": "https://www.nytimes.com/2026/08/22/us/politics/election-polls-confusion-prediction-markets.html",
+      "note": "",
+      "expires": "2026-08-24T00:00:00Z"
     }
   ]
 }
