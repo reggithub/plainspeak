@@ -414,6 +414,19 @@
       "source": "https://www.nytimes.com/2026/08/22/us/politics/angie-nixon-florida-senate-socialist.html",
       "note": "",
       "expires": "2026-08-24T00:00:00Z"
+    },
+    {
+      "id": "2026-08-31-a",
+      "headline": "Why the United States Can't Quit Its Wars",
+      "ops": [
+        { "t": "strike", "start": 0, "len": 8 },
+        { "t": "insert", "at": 8, "text": "The " },
+        { "t": "strike", "start": 33, "len": 8 },
+        { "t": "insert", "at": 41, "text": "This War Because its \"Leader\" is a Needy Man-Child Who Can Never Be Wrong" }
+      ],
+      "source": "https://www.nytimes.com/2026/08/30/us/politics/us-wars-iran-afghanistan.html",
+      "note": "",
+      "expires": "2026-09-02T00:00:00Z"
     }
   ]
 }
