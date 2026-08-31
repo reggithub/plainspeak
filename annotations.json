@@ -421,8 +421,9 @@
       "ops": [
         { "t": "strike", "start": 0, "len": 8 },
         { "t": "insert", "at": 8, "text": "The " },
-        { "t": "strike", "start": 33, "len": 8 },
-        { "t": "insert", "at": 41, "text": "This War Because its \"Leader\" is a Needy Man-Child Who Can Never Be Wrong" }
+        { "t": "insert", "at": 33, "text": "This War Because " },
+        { "t": "strike", "start": 37, "len": 4 },
+        { "t": "insert", "at": 41, "text": "Irresponsible Man-Child \"Leader\" Can't Ever Be Wrong About Anything" }
       ],
       "source": "https://www.nytimes.com/2026/08/30/us/politics/us-wars-iran-afghanistan.html",
       "note": "",
