@@ -417,15 +417,12 @@
     },
     {
       "id": "2026-08-31-a",
-      "headline": "Why the United States Can't Quit Its Wars",
+      "headline": "White House Ballroom Construction Can Proceed, Supreme Court Says",
       "ops": [
-        { "t": "strike", "start": 0, "len": 8 },
-        { "t": "insert", "at": 8, "text": "The " },
-        { "t": "insert", "at": 33, "text": "This War Because " },
-        { "t": "strike", "start": 37, "len": 4 },
-        { "t": "insert", "at": 41, "text": "Irresponsible Man-Child \"Leader\" Can't Ever Be Wrong About Anything" }
+        { "t": "insert", "at": 12, "text": "Fuhrer" },
+        { "t": "insert", "at": 65, "text": ". \"Have at it. DC is yours!\"" }
       ],
-      "source": "https://www.nytimes.com/2026/08/30/us/politics/us-wars-iran-afghanistan.html",
+      "source": "https://www.nytimes.com/live/2026/08/31/us/trump-news",
       "note": "",
       "expires": "2026-09-02T00:00:00Z"
     }
